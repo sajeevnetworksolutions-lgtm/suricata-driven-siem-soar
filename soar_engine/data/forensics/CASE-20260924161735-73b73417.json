@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924161735-73b73417",
+  "investigation_opened_at": "2026-09-24T16:17:35.066727",
+  "triggering_alert": {
+    "id": "73b73417-c11c-48ab-ab21-f10d7b11cd9b",
+    "timestamp": "2026-09-24T16:17:35.062241",
+    "signature": "SIEM-DNS: Potential DNS Data Exfiltration / Tunneling",
+    "severity": 2,
+    "category": "Bad-Unknown",
+    "source": "192.0.2.99:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "192.0.2.99",
+    "reputation_score": 40,
+    "is_malicious": false,
+    "country": "External Entity",
+    "country_code": "EXT",
+    "isp": "Public WAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "External-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:17:35.062241",
+    "src_ip": "192.0.2.99",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-DNS: Potential DNS Data Exfiltration / Tunneling",
+      "severity": 2,
+      "category": "Bad-Unknown"
+    }
+  }
+}

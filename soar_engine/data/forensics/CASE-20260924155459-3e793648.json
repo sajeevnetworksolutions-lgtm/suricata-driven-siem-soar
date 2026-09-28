@@ -1,0 +1,44 @@
+{
+  "case_id": "CASE-20260924155459-3e793648",
+  "investigation_opened_at": "2026-09-24T15:54:59.943769",
+  "triggering_alert": {
+    "id": "3e793648-d2f4-4f5d-8464-d6fb73b2e643",
+    "timestamp": "2026-09-24T15:54:59.892287",
+    "signature": "SIEM-C2: Emulated Malware C2 Heartbeat Beacon Detected",
+    "severity": 1,
+    "category": "Trojan-Activity",
+    "source": "172.28.0.200:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "172.28.0.200",
+    "reputation_score": 88,
+    "is_malicious": true,
+    "country": "RU",
+    "country_code": "RU",
+    "isp": "Bulletproof Host",
+    "abuse_confidence_score": 88,
+    "tags": [
+      "C2 Server",
+      "Botnet"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T15:54:59.892287",
+    "src_ip": "172.28.0.200",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-C2: Emulated Malware C2 Heartbeat Beacon Detected",
+      "severity": 1,
+      "category": "Trojan-Activity"
+    }
+  }
+}

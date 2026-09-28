@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924164136-94e63ab9",
+  "investigation_opened_at": "2026-09-24T16:41:36.152819",
+  "triggering_alert": {
+    "id": "94e63ab9-2c68-40ed-abae-d2f660292c08",
+    "timestamp": "2026-09-24T16:41:36.121213",
+    "signature": "SIEM-HONEYPOT: Restricted Canary File Access Attempt (Secret_Financial_Records_2026.pdf)",
+    "severity": 1,
+    "category": "Policy-Violation",
+    "source": "192.168.1.99:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "192.168.1.99",
+    "reputation_score": 10,
+    "is_malicious": false,
+    "country": "Local/Lab Network",
+    "country_code": "LOC",
+    "isp": "Private LAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "Internal-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:41:36.121213",
+    "src_ip": "192.168.1.99",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-HONEYPOT: Restricted Canary File Access Attempt (Secret_Financial_Records_2026.pdf)",
+      "severity": 1,
+      "category": "Policy-Violation"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924155504-d9300065",
+  "investigation_opened_at": "2026-09-24T15:55:04.960116",
+  "triggering_alert": {
+    "id": "d9300065-3006-4d2e-a8b3-d5ba7853f11f",
+    "timestamp": "2026-09-24T15:55:04.884316",
+    "signature": "SIEM-EXFIL: Unencrypted RSA Private Key Exfiltration Attempt",
+    "severity": 1,
+    "category": "Policy-Violation",
+    "source": "172.28.0.110:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "172.28.0.110",
+    "reputation_score": 10,
+    "is_malicious": false,
+    "country": "Local/Lab Network",
+    "country_code": "LOC",
+    "isp": "Private LAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "Internal-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T15:55:04.884316",
+    "src_ip": "172.28.0.110",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-EXFIL: Unencrypted RSA Private Key Exfiltration Attempt",
+      "severity": 1,
+      "category": "Policy-Violation"
+    }
+  }
+}

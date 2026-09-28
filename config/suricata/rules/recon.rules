@@ -1,0 +1,22 @@
+# =============================================================================
+# RECONNAISSANCE & PORT SCANNING DETECTION RULES
+# MITRE ATT&CK: TA0043 (Reconnaissance) / T1595 (Active Scanning)
+# =============================================================================
+
+# 1. TCP SYN Scan / Port Sweep
+alert tcp any any -> $HOME_NET any (msg:"SIEM-RECON: Potential TCP SYN Port Scan Detected"; flags:S,12; threshold:type both, track by_src, count 10, seconds 5; classtype:attempted-recon; sid:1000001; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.001;)
+
+# 2. TCP NULL Scan (No flags set)
+alert tcp any any -> $HOME_NET any (msg:"SIEM-RECON: TCP NULL Scan Detected"; flags:0; classtype:attempted-recon; sid:1000002; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.001;)
+
+# 3. TCP FIN Scan
+alert tcp any any -> $HOME_NET any (msg:"SIEM-RECON: TCP FIN Scan Detected"; flags:F,12; classtype:attempted-recon; sid:1000003; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.001;)
+
+# 4. TCP Xmas Scan (FIN, PSH, URG flags)
+alert tcp any any -> $HOME_NET any (msg:"SIEM-RECON: TCP Xmas Scan Detected"; flags:FPU,12; classtype:attempted-recon; sid:1000004; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.001;)
+
+# 5. ICMP Ping Sweep / Network Discovery
+alert icmp any any -> $HOME_NET any (msg:"SIEM-RECON: ICMP Ping Sweep Detected"; itype:8; threshold:type both, track by_src, count 8, seconds 4; classtype:attempted-recon; sid:1000005; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.001;)
+
+# 6. Nmap Scripting Engine (NSE) User-Agent
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-RECON: Nmap Scripting Engine (NSE) User-Agent Detected"; flow:established,to_server; http.user_agent; content:"Nmap Scripting Engine"; nocase; classtype:attempted-recon; sid:1000006; rev:1; metadata:mitre_tactic_id TA0043, mitre_technique_id T1595.002;)

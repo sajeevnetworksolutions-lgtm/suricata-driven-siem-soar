@@ -1,0 +1,121 @@
+%YAML 1.1
+---
+
+# Suricata SIEM Configuration
+vars:
+  address-groups:
+    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,127.0.0.0/8]"
+    EXTERNAL_NET: "!$HOME_NET"
+    HTTP_SERVERS: "$HOME_NET"
+    SQL_SERVERS: "$HOME_NET"
+    DNS_SERVERS: "$HOME_NET"
+
+  port-groups:
+    HTTP_PORTS: "80,8080,8000,8888"
+    SHELLCODE_PORTS: "!80"
+    ORACLE_PORTS: 1521
+    SSH_PORTS: "22,2222"
+
+default-log-dir: /var/log/suricata
+
+# Global Stats Configuration
+stats:
+  enabled: yes
+  interval: 10sec
+
+# Outputs: EVE JSON is the core structured logging for Filebeat SIEM & SOAR
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      pcap-file: false
+      community-id: true
+      community-id-seed: 0
+      types:
+        - alert:
+            payload: yes
+            payload-printable: yes
+            packet: yes
+            metadata: yes
+            http-body: yes
+            http-body-printable: yes
+            tagged-packets: yes
+        - flow
+        - netflow
+        - http:
+            extended: yes
+            dump-all-headers: both
+        - dns:
+            version: 2
+            query: yes
+            answer: yes
+        - tls:
+            extended: yes
+        - files:
+            force-magic: yes
+        - drop:
+            alerts: yes
+        - ssh
+        - stats:
+            totals: yes
+            threads: no
+            deltas: yes
+
+# Multi-threading Engine
+threading:
+  set-cpu-affinity: no
+  detect-thread-ratio: 1.0
+
+# Rule Engine Configuration
+default-rule-path: /var/lib/suricata/rules
+rule-files:
+  - recon.rules
+  - auth_bruteforce.rules
+  - web_attacks.rules
+  - malware_c2.rules
+  - dns_exfil.rules
+  - data_exfil.rules
+
+# App Layer Parsers
+app-layer:
+  protocols:
+    tls:
+      enabled: yes
+      detection-ports:
+        dp: 443
+    http:
+      enabled: yes
+      libhtp:
+        default-config:
+          personality: IDS
+          request-body-limit: 100kb
+          response-body-limit: 100kb
+    dns:
+      global-memcap: 16mb
+      state-memcap: 512kb
+      tcp:
+        enabled: yes
+        port: 53
+      udp:
+        enabled: yes
+        port: 53
+    ssh:
+      enabled: yes
+
+# Advanced Capture settings (AF_PACKET for Linux container)
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+    use-mmap: yes
+    mmap-locked: no
+    tpacket-v3: yes
+    ring-size: 2048
+    block-size: 32768

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suricata SIEM + SOAR Automated Incident Response Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              900: '#1e3a8a',
+            },
+            darkbg: '#0f172a',
+            darkcard: '#1e293b',
+            darkborder: '#334155'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Header / Navbar -->
+  <header class="bg-[#111827] border-b border-gray-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-10 rounded-lg bg-red-600 flex items-center justify-center text-white text-xl shadow-lg shadow-red-500/30">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Suricata SIEM + SOAR 
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LIVE SENSOR</span>
+          </h1>
+          <p class="text-xs text-gray-400">Automated Threat Detection & Incident Response Platform</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div id="ws-status" class="flex items-center space-x-2 text-xs text-gray-400 bg-gray-800 px-3 py-1.5 rounded-full border border-gray-700">
+          <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>Connecting WebSocket...</span>
+        </div>
+        <button onclick="openManualBanModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-ban"></i> Manual IP Quarantine
+        </button>
+        <a href="http://localhost:5601" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-line"></i> Open Kibana SIEM
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+        <div>
+          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Total Telemetry</p>
+          <p id="stat-events" class="text-2xl font-bold text-white mt-1">0</p>
+        </div>
+        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 text-lg">
+          <i class="fa-solid fa-network-wired"></i>
+        </div>
+      </div>
+
+      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+        <div>
+          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Alerts Detected</p>
+          <p id="stat-alerts" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+        </div>
+        <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400 text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+      </div>
+
+      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+        <div>
+          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Critical Incidents</p>
+          <p id="stat-critical" class="text-2xl font-bold text-red-500 mt-1">0</p>
+        </div>
+        <div class="p-3 bg-red-500/10 rounded-lg text-red-400 text-lg">
+          <i class="fa-solid fa-skull-crossbones"></i>
+        </div>
+      </div>
+
+      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+        <div>
+          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Active IP Bans</p>
+          <p id="stat-bans" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
+        </div>
+        <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-lg">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+      </div>
+
+      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+        <div>
+          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">SOAR Actions</p>
+          <p id="stat-soar" class="text-2xl font-bold text-purple-400 mt-1">0</p>
+        </div>
+        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 text-lg">
+          <i class="fa-solid fa-bolt-lightning"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Defense & Live Threat Feeds Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column: Active Quarantined IP Blacklist (SOAR Live Action) -->
+      <div class="lg:col-span-1 bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-shield-virus text-red-400"></i> Active Defense / Quarantined IPs
+          </h2>
+          <span id="active-ban-count" class="text-xs font-mono bg-red-500/20 text-red-400 px-2 py-0.5 rounded border border-red-500/30">0 Active</span>
+        </div>
+        <div class="mt-4 flex-1 overflow-y-auto max-h-[420px] space-y-3" id="bans-container">
+          <div class="text-center py-8 text-xs text-gray-500">No active IP quarantines currently enforced.</div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Incident Detection Feed -->
+      <div class="lg:col-span-2 bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-bell text-amber-400"></i> Real-time Security Alert Stream
+            </h2>
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+          </div>
+          <button onclick="clearIncidentList()" class="text-xs text-gray-400 hover:text-white transition">Clear View</button>
+        </div>
+
+        <div class="mt-4 flex-1 overflow-y-auto max-h-[420px] space-y-2.5" id="incidents-container">
+          <div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section: SOAR Playbook Execution Audit Logs -->
+    <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-robot text-purple-400"></i> Automated SOAR Playbook Execution Audit Trail
+        </h2>
+        <span class="text-xs text-gray-400">Immutable SOAR Engine Log</span>
+      </div>
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="text-gray-400 border-b border-gray-800 uppercase tracking-wider font-semibold">
+              <th class="py-2.5 px-3">Execution ID</th>
+              <th class="py-2.5 px-3">Timestamp</th>
+              <th class="py-2.5 px-3">Playbook Name</th>
+              <th class="py-2.5 px-3">Target IP</th>
+              <th class="py-2.5 px-3">Action Type</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3">Execution Details</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body" class="divide-y divide-gray-800/60 font-mono">
+            <tr>
+              <td colspan="7" class="py-6 text-center text-gray-500">No automated playbooks executed yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Manual Quarantine Modal -->
+  <div id="manual-ban-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-[#182235] border border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-700 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-ban text-red-500"></i> Manual IP Quarantine
+        </h3>
+        <button onclick="closeManualBanModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Target Attacker IP Address</label>
+          <input id="ban-input-ip" type="text" placeholder="e.g. 192.168.1.100" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white font-mono focus:border-red-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Quarantine TTL (Seconds)</label>
+          <input id="ban-input-ttl" type="number" value="300" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white font-mono focus:border-red-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Reason / Case Reference</label>
+          <input id="ban-input-reason" type="text" value="Manual SOC Quarantine" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white focus:border-red-500 focus:outline-none">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-3 border-t border-gray-700">
+        <button onclick="closeManualBanModal()" class="px-4 py-1.5 text-xs text-gray-300 hover:bg-gray-800 rounded">Cancel</button>
+        <button onclick="submitManualBan()" class="px-4 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold rounded shadow">Enforce Quarantine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threat Intel Modal -->
+  <div id="intel-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-[#182235] border border-gray-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-700 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-globe text-blue-400"></i> Threat Intelligence Profile
+        </h3>
+        <button onclick="closeIntelModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="intel-modal-content" class="text-xs space-y-3">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Client Logic -->
+  <script>
+    let ws;
+    const incidents = [];
+    const bans = new Map();
+
+    async function fetchInitialData() {
+      try {
+        const [statsRes, incidentsRes, bansRes, auditRes] = await Promise.all([
+          fetch('/api/stats').then(r => r.json()),
+          fetch('/api/incidents').then(r => r.json()),
+          fetch('/api/bans').then(r => r.json()),
+          fetch('/api/audit-logs').then(r => r.json())
+        ]);
+        updateStatsUI(statsRes);
+        renderIncidents(incidentsRes);
+        renderBans(bansRes);
+        renderAuditLogs(auditRes);
+      } catch (err) {
+        console.error("Error fetching initial SOAR state:", err);
+      }
+    }
+
+    function initWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws/live`);
+
+      ws.onopen = () => {
+        const el = document.getElementById('ws-status');
+        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-emerald-400"></span><span>Connected to SOAR Engine</span>';
+      };
+
+      ws.onclose = () => {
+        const el = document.getElementById('ws-status');
+        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-red-400 animate-ping"></span><span>Reconnecting...</span>';
+        setTimeout(initWebSocket, 2000);
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'NEW_INCIDENT') {
+          addIncidentCard(msg.data, true);
+        } else if (msg.type === 'STATS_UPDATE') {
+          updateStatsUI(msg.data);
+        }
+        fetchInitialData();
+      };
+    }
+
+    function updateStatsUI(stats) {
+      document.getElementById('stat-events').textContent = stats.total_events_processed.toLocaleString();
+      document.getElementById('stat-alerts').textContent = stats.total_alerts_detected.toLocaleString();
+      document.getElementById('stat-critical').textContent = stats.critical_alerts.toLocaleString();
+      document.getElementById('stat-bans').textContent = stats.active_banned_ips.toLocaleString();
+      document.getElementById('stat-soar').textContent = stats.total_playbooks_executed.toLocaleString();
+    }
+
+    function renderIncidents(list) {
+      const container = document.getElementById('incidents-container');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>';
+        return;
+      }
+      container.innerHTML = '';
+      list.slice(0, 30).forEach(item => addIncidentCard(item, false));
+    }
+
+    function addIncidentCard(alert, prepend) {
+      const container = document.getElementById('incidents-container');
+      if (container.children.length === 1 && container.children[0].classList.contains('text-center')) {
+        container.innerHTML = '';
+      }
+
+      const card = document.createElement('div');
+      const isCrit = alert.severity === 1;
+      const isHigh = alert.severity === 2;
+      
+      const badgeColor = isCrit ? 'bg-red-500/20 text-red-400 border-red-500/30' : isHigh ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      const severityLabel = isCrit ? 'SEV-1 CRITICAL' : isHigh ? 'SEV-2 HIGH' : 'SEV-3 MEDIUM';
+
+      card.className = `p-3.5 bg-gray-900/80 border ${isCrit ? 'border-red-900/60' : 'border-gray-800'} rounded-lg hover:border-gray-700 transition flex flex-col gap-2`;
+      card.innerHTML = `
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded border ${badgeColor}">${severityLabel}</span>
+            <span class="text-xs font-bold text-white">${escapeHtml(alert.signature)}</span>
+          </div>
+          <span class="text-[10px] font-mono text-gray-400">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-gray-300 font-mono">
+          <div><span class="text-gray-500">SRC:</span> <button onclick="openThreatIntel('${alert.src_ip}')" class="text-blue-400 hover:underline">${alert.src_ip}:${alert.src_port}</button></div>
+          <div><span class="text-gray-500">DST:</span> <span class="text-gray-200">${alert.dest_ip}:${alert.dest_port}</span></div>
+          <div><span class="text-gray-500">PROTO:</span> <span class="text-purple-400">${alert.proto}</span></div>
+          <div><span class="text-gray-500">MITRE:</span> <span class="text-amber-400">${alert.mitre_tactic || 'TA0043'}</span></div>
+        </div>
+      `;
+
+      if (prepend && container.firstChild) {
+        container.insertBefore(card, container.firstChild);
+      } else {
+        container.appendChild(card);
+      }
+    }
+
+    function renderBans(list) {
+      const container = document.getElementById('bans-container');
+      document.getElementById('active-ban-count').textContent = `${list.length} Active`;
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-xs text-gray-500">No active IP quarantines currently enforced.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      list.forEach(ban => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-red-950/20 border border-red-900/50 rounded-lg flex items-center justify-between';
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs">
+              <span class="h-2 w-2 rounded-full bg-red-500"></span>
+              <span class="font-bold text-white">${ban.ip}</span>
+              <span class="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded">BLOCKED</span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 truncate max-w-[220px]">${ban.reason}</p>
+          </div>
+          <button onclick="unbanIP('${ban.ip}')" class="bg-gray-800 hover:bg-emerald-700 hover:text-white text-gray-300 text-[11px] px-2.5 py-1 rounded transition border border-gray-700">
+            Pardon / Unban
+          </button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderAuditLogs(logs) {
+      const tbody = document.getElementById('audit-table-body');
+      if (!logs || logs.length === 0) return;
+      tbody.innerHTML = '';
+      logs.slice(0, 15).forEach(entry => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-800/40 transition border-b border-gray-800/50';
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-blue-400 font-bold">${entry.id}</td>
+          <td class="py-2 px-3 text-gray-400">${new Date(entry.timestamp).toLocaleTimeString()}</td>
+          <td class="py-2 px-3 text-white">${entry.playbook_name}</td>
+          <td class="py-2 px-3 text-amber-300">${entry.target_ip}</td>
+          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[10px]">${entry.action_type}</span></td>
+          <td class="py-2 px-3"><span class="text-emerald-400 font-semibold">${entry.status}</span></td>
+          <td class="py-2 px-3 text-gray-400 text-[11px]">${JSON.stringify(entry.details)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function unbanIP(ip) {
+      if (!confirm(`Are you sure you want to lift the quarantine ban on ${ip}?`)) return;
+      await fetch(`/api/bans/${ip}`, { method: 'DELETE' });
+      fetchInitialData();
+    }
+
+    function openManualBanModal() {
+      document.getElementById('manual-ban-modal').classList.remove('hidden');
+    }
+    function closeManualBanModal() {
+      document.getElementById('manual-ban-modal').classList.add('hidden');
+    }
+
+    async function submitManualBan() {
+      const ip = document.getElementById('ban-input-ip').value.trim();
+      const ttl = parseInt(document.getElementById('ban-input-ttl').value);
+      const reason = document.getElementById('ban-input-reason').value.trim();
+      if (!ip) return alert('Please enter an IP');
+
+      await fetch('/api/bans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip, ttl_seconds: ttl, reason })
+      });
+      closeManualBanModal();
+      fetchInitialData();
+    }
+
+    async function openThreatIntel(ip) {
+      const res = await fetch(`/api/threat-intel/${ip}`).then(r => r.json());
+      const content = document.getElementById('intel-modal-content');
+      content.innerHTML = `
+        <div class="bg-gray-900 p-4 rounded-lg space-y-2 border border-gray-800">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-bold text-white font-mono">${res.ip}</span>
+            <span class="text-xs px-2 py-0.5 rounded ${res.is_malicious ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'} font-bold">
+              ${res.is_malicious ? 'MALICIOUS THREAT' : 'LOW RISK / CLEAN'}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 text-gray-300">
+            <div><span class="text-gray-500">Reputation Score:</span> <span class="font-bold text-amber-400">${res.reputation_score}/100</span></div>
+            <div><span class="text-gray-500">Country:</span> <span>${res.country} (${res.country_code})</span></div>
+            <div><span class="text-gray-500">ISP/ASN:</span> <span>${res.isp}</span></div>
+            <div><span class="text-gray-500">Abuse Confidence:</span> <span>${res.abuse_confidence_score}%</span></div>
+          </div>
+          <div class="pt-2">
+            <span class="text-gray-500 text-[11px]">Threat Tags:</span>
+            <div class="flex gap-1 mt-1">${res.tags.map(t => `<span class="bg-gray-800 text-blue-300 px-2 py-0.5 rounded text-[10px] border border-gray-700">${t}</span>`).join('')}</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('intel-modal').classList.remove('hidden');
+    }
+
+    function closeIntelModal() {
+      document.getElementById('intel-modal').classList.add('hidden');
+    }
+
+    function clearIncidentList() {
+      document.getElementById('incidents-container').innerHTML = '<div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>';
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.onload = () => {
+      fetchInitialData();
+      initWebSocket();
+      setInterval(fetchInitialData, 5000);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924165057-c02961a7",
+  "investigation_opened_at": "2026-09-24T16:50:57.384068",
+  "triggering_alert": {
+    "id": "c02961a7-8ca5-4e2e-9b96-9559a02957b3",
+    "timestamp": "2026-09-24T16:50:57.364071",
+    "signature": "SIEM-WEB: Cross-Site Scripting (XSS) Tag Injection Detected",
+    "severity": 2,
+    "category": "Web-Application-Attack",
+    "source": "198.51.100.55:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "198.51.100.55",
+    "reputation_score": 40,
+    "is_malicious": false,
+    "country": "External Entity",
+    "country_code": "EXT",
+    "isp": "Public WAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "External-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:50:57.364071",
+    "src_ip": "198.51.100.55",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-WEB: Cross-Site Scripting (XSS) Tag Injection Detected",
+      "severity": 2,
+      "category": "Web-Application-Attack"
+    }
+  }
+}

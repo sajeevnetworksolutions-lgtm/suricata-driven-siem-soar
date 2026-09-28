@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924161733-337b637f",
+  "investigation_opened_at": "2026-09-24T16:17:33.949802",
+  "triggering_alert": {
+    "id": "337b637f-0e6e-4a33-9f8e-50ce9b90fbc2",
+    "timestamp": "2026-09-24T16:17:33.886729",
+    "signature": "SIEM-WEB: SQL Injection Attempt (UNION SELECT detected)",
+    "severity": 1,
+    "category": "Web-Application-Attack",
+    "source": "192.0.2.140:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "192.0.2.140",
+    "reputation_score": 40,
+    "is_malicious": false,
+    "country": "External Entity",
+    "country_code": "EXT",
+    "isp": "Public WAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "External-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:17:33.886729",
+    "src_ip": "192.0.2.140",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-WEB: SQL Injection Attempt (UNION SELECT detected)",
+      "severity": 1,
+      "category": "Web-Application-Attack"
+    }
+  }
+}

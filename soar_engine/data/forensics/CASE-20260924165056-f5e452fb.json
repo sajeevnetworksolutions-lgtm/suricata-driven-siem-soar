@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924165056-f5e452fb",
+  "investigation_opened_at": "2026-09-24T16:50:56.714793",
+  "triggering_alert": {
+    "id": "f5e452fb-4270-4755-bde2-50c5517c1ce5",
+    "timestamp": "2026-09-24T16:50:56.668001",
+    "signature": "SIEM-AUTH: Multiple HTTP 401 Unauthorized Responses (Web Brute Force)",
+    "severity": 1,
+    "category": "Attempted-Admin",
+    "source": "172.28.0.105:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "172.28.0.105",
+    "reputation_score": 10,
+    "is_malicious": false,
+    "country": "Local/Lab Network",
+    "country_code": "LOC",
+    "isp": "Private LAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "Internal-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:50:56.668001",
+    "src_ip": "172.28.0.105",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-AUTH: Multiple HTTP 401 Unauthorized Responses (Web Brute Force)",
+      "severity": 1,
+      "category": "Attempted-Admin"
+    }
+  }
+}

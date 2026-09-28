@@ -1,0 +1,61 @@
+filebeat.inputs:
+  - type: filestream
+    id: suricata-eve-log
+    enabled: true
+    paths:
+      - /var/log/suricata/eve.json
+    parsers:
+      - ndjson:
+          target: "suricata.eve"
+          add_error_key: true
+          overwrite_keys: true
+    fields:
+      event.dataset: suricata.eve
+      event.module: suricata
+    fields_under_root: true
+
+processors:
+  - add_host_metadata:
+      when.not.has_fields: ['host']
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - copy_fields:
+      fields:
+        - from: suricata.eve.src_ip
+          to: source.ip
+        - from: suricata.eve.src_port
+          to: source.port
+        - from: suricata.eve.dest_ip
+          to: destination.ip
+        - from: suricata.eve.dest_port
+          to: destination.port
+        - from: suricata.eve.proto
+          to: network.transport
+        - from: suricata.eve.event_type
+          to: event.action
+        - from: suricata.eve.alert.signature
+          to: rule.name
+        - from: suricata.eve.alert.category
+          to: rule.category
+        - from: suricata.eve.alert.severity
+          to: event.severity
+      fail_on_error: false
+      ignore_missing: true
+
+# Kibana connection
+setup.kibana:
+  host: "http://kibana:5601"
+
+# Elasticsearch output
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "suricata-events-%{+yyyy.MM.dd}"
+
+setup.template.name: "suricata-events"
+setup.template.pattern: "suricata-events-*"
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+setup.ilm.enabled: false
+logging.level: info

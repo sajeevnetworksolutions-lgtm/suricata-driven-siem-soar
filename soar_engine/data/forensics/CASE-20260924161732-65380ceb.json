@@ -1,0 +1,43 @@
+{
+  "case_id": "CASE-20260924161732-65380ceb",
+  "investigation_opened_at": "2026-09-24T16:17:32.699162",
+  "triggering_alert": {
+    "id": "65380ceb-f879-4568-9675-503b4ea97aae",
+    "timestamp": "2026-09-24T16:17:32.695369",
+    "signature": "SIEM-RECON: Potential TCP SYN Port Scan Detected",
+    "severity": 3,
+    "category": "Attempted-Recon",
+    "source": "198.51.100.42:0",
+    "destination": "127.0.0.1:80",
+    "protocol": "TCP",
+    "mitre_tactic": "N/A",
+    "mitre_technique": "N/A"
+  },
+  "threat_intelligence": {
+    "ip": "198.51.100.42",
+    "reputation_score": 40,
+    "is_malicious": false,
+    "country": "External Entity",
+    "country_code": "EXT",
+    "isp": "Public WAN",
+    "abuse_confidence_score": 0,
+    "tags": [
+      "External-Host"
+    ],
+    "last_reported": null
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-09-24T16:17:32.695369",
+    "src_ip": "198.51.100.42",
+    "src_port": 0,
+    "dest_ip": "127.0.0.1",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "signature": "SIEM-RECON: Potential TCP SYN Port Scan Detected",
+      "severity": 3,
+      "category": "Attempted-Recon"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# =============================================================================
+# DNS THREATS & DNS TUNNELING DETECTION RULES
+# MITRE ATT&CK: TA0010 (Exfiltration) / T1048.003 (DNS Tunneling)
+# =============================================================================
+
+# 1. High-Entropy / Long Subdomain Query (DNS Tunneling / Exfil Pattern)
+alert dns any any -> any 53 (msg:"SIEM-DNS: Potential DNS Data Exfiltration / Tunneling (Oversized Query Name)"; dns.query; isdataat:50,relative; classtype:bad-unknown; sid:1000040; rev:1; metadata:mitre_tactic_id TA0010, mitre_technique_id T1048.003;)
+
+# 2. Suspicious Base64 / Hex Encoded DNS Query Label
+alert dns any any -> any 53 (msg:"SIEM-DNS: Encoded Data in DNS Request Header"; dns.query; pcre:"/^[a-zA-Z0-9+\/=]{30,}\./"; classtype:bad-unknown; sid:1000041; rev:1; metadata:mitre_tactic_id TA0010, mitre_technique_id T1048.003;)
+
+# 3. High Volume of DNS TXT Queries (Possible C2 / Data Channel)
+alert dns any any -> any 53 (msg:"SIEM-DNS: High Rate of DNS TXT Record Queries (Possible C2/Exfil)"; dns.query; threshold:type both, track by_src, count 15, seconds 5; classtype:bad-unknown; sid:1000042; rev:1; metadata:mitre_tactic_id TA0011, mitre_technique_id T1071.004;)

@@ -1,0 +1,22 @@
+# =============================================================================
+# WEB APPLICATION ATTACK DETECTION RULES
+# MITRE ATT&CK: TA0001 (Initial Access) / T1190 (Exploit Public-Facing App)
+# =============================================================================
+
+# 1. SQL Injection (UNION SELECT)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: SQL Injection Attempt (UNION SELECT detected)"; flow:established,to_server; http.uri; content:"union"; nocase; content:"select"; nocase; distance:0; classtype:web-application-attack; sid:1000020; rev:1; metadata:mitre_tactic_id TA0001, mitre_technique_id T1190;)
+
+# 2. SQL Injection (Classic ' OR 1=1 / Boolean / Comment Syntax)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: SQL Injection Attempt (Boolean / OR syntax)"; flow:established,to_server; http.uri; pcre:"/(\%27|\')(\s)*(or|and)(\s)+.+(\=|<|>)/i"; classtype:web-application-attack; sid:1000021; rev:1; metadata:mitre_tactic_id TA0001, mitre_technique_id T1190;)
+
+# 3. Cross-Site Scripting (XSS - <script> tag)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: Cross-Site Scripting (XSS) Tag Injection Detected"; flow:established,to_server; http.uri; pcre:"/(%3C|<)\s*script/i"; classtype:web-application-attack; sid:1000022; rev:1; metadata:mitre_tactic_id TA0001, mitre_technique_id T1059.007;)
+
+# 4. Cross-Site Scripting (XSS - Event Handler e.g. onerror / onload)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: Cross-Site Scripting (XSS) Event Handler Detected"; flow:established,to_server; http.uri; pcre:"/(onerror|onload|onclick|javascript:)\s*=/i"; classtype:web-application-attack; sid:1000023; rev:1; metadata:mitre_tactic_id TA0001, mitre_technique_id T1059.007;)
+
+# 5. Path / Directory Traversal (etc/passwd or win.ini)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: Directory / Path Traversal Attempt (../etc/passwd)"; flow:established,to_server; http.uri; pcre:"/(\.\.\/|\.\.\\)+.*(etc\/passwd|windows\/win\.ini|boot\.ini)/i"; classtype:web-application-attack; sid:1000024; rev:1; metadata:mitre_tactic_id TA0001, mitre_technique_id T1083;)
+
+# 6. Command Injection in Query String or Request Body
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-WEB: OS Command Injection Attempt Detected"; flow:established,to_server; http.uri; pcre:"/(;|\||`|&&)\s*(cat|id|whoami|ls|uname|powershell|cmd\.exe)/i"; classtype:web-application-attack; sid:1000025; rev:1; metadata:mitre_tactic_id TA0002, mitre_technique_id T1059;)

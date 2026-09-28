@@ -1,0 +1,13 @@
+# =============================================================================
+# DATA EXFILTRATION & SUSPICIOUS OUTBOUND DETECTION RULES
+# MITRE ATT&CK: TA0010 (Exfiltration) / T1041 (Exfiltration Over C2 Channel)
+# =============================================================================
+
+# 1. Suspicious Large File Upload via HTTP POST
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"SIEM-EXFIL: High Volume HTTP POST / Potential File Exfiltration"; flow:established,to_server; http.method; content:"POST"; http.request_body; content:"filename="; isdataat:5000,relative; classtype:suspicious-traffic; sid:1000050; rev:1; metadata:mitre_tactic_id TA0010, mitre_technique_id T1048.002;)
+
+# 2. Suspicious Outbound Transfer of Sensitive Archive / Database
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"SIEM-EXFIL: Outbound Transfer of Database or Archive File"; flow:established,to_server; http.uri; pcre:"\.(sql|tar\.gz|zip|7z|bak|dump|kdbx)$"i; classtype:suspicious-traffic; sid:1000051; rev:1; metadata:mitre_tactic_id TA0010, mitre_technique_id T1567;)
+
+# 3. Plaintext Private Key / Password File in Outbound Stream
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"SIEM-EXFIL: Unencrypted RSA Private Key Exfiltration Attempt"; content:"-----BEGIN RSA PRIVATE KEY-----"; classtype:policy-violation; sid:1000052; rev:1; metadata:mitre_tactic_id TA0010, mitre_technique_id T1048;)

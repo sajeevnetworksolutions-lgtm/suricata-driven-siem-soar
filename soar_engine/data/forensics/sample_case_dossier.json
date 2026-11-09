@@ -1,0 +1,54 @@
+{
+  "case_id": "CASE-2026-SAMPLE-001",
+  "investigation_opened_at": "2026-11-09T18:00:00.000000",
+  "triggering_alert": {
+    "id": "sample-uuid-88cc571c-f815",
+    "timestamp": "2026-11-09T18:00:00.000000",
+    "signature": "SIEM-WEB: SQL Injection Attempt (UNION SELECT detected)",
+    "severity": 1,
+    "category": "Web-Application-Attack",
+    "source": "192.168.1.150:49152",
+    "destination": "10.0.0.80:80",
+    "protocol": "TCP",
+    "mitre_tactic": "TA0001",
+    "mitre_technique": "T1190"
+  },
+  "threat_intelligence": {
+    "ip": "192.168.1.150",
+    "reputation_score": 90,
+    "is_malicious": true,
+    "country": "CN",
+    "country_code": "CN",
+    "isp": "Known APT Subnet",
+    "abuse_confidence_score": 90,
+    "tags": ["Exploit Scanner", "Automated SQLi"],
+    "last_reported": "2026-11-09T17:45:00Z"
+  },
+  "raw_eve_payload": {
+    "event_type": "alert",
+    "timestamp": "2026-11-09T18:00:00.000000",
+    "src_ip": "192.168.1.150",
+    "src_port": 49152,
+    "dest_ip": "10.0.0.80",
+    "dest_port": 80,
+    "proto": "TCP",
+    "alert": {
+      "action": "allowed",
+      "gid": 1,
+      "signature_id": 1000020,
+      "rev": 1,
+      "signature": "SIEM-WEB: SQL Injection Attempt (UNION SELECT detected)",
+      "category": "Web-Application-Attack",
+      "severity": 1
+    },
+    "http": {
+      "hostname": "portal.internal.corp",
+      "url": "/search?q=1%27%20UNION%20SELECT%20null,username,password%20FROM%20users--",
+      "http_user_agent": "sqlmap/1.7#dev",
+      "http_method": "GET",
+      "protocol": "HTTP/1.1",
+      "status": 200,
+      "length": 142
+    }
+  }
+}

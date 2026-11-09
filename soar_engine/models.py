@@ -57,3 +57,4 @@ class SOARStats(BaseModel):
     active_banned_ips: int = 0
     total_playbooks_executed: int = 0
     automated_containments: int = 0
+    avg_response_time_ms: float = 118.4

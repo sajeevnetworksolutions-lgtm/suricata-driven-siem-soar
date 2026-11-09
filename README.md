@@ -35,7 +35,7 @@ This platform eliminates manual response latency by marrying **Suricata 7.x** mu
 1. **Instantly Quarantines Malicious IPs** via dynamic firewall drop rules with a **Time-To-Live (TTL)** auto-expiration timer (preventing permanent lockouts).
 2. **Enriches Indicators of Compromise (IOCs)** with real-time Threat Intelligence (AbuseIPDB, GeoIP, and ISP reputation).
 3. **Generates Structured Forensic Evidence Dossiers** (`CASE-*.json`) capturing decoded payloads and protocol headers.
-4. **Pushes Real-Time Alerts** to a dark-mode WebSocket SOC Operations Dashboard, Slack, and Discord.
+4. **Pushes Real-Time Alerts** to a high-visibility light-mode WebSocket SOC Operations Dashboard, Slack, and Discord.
 
 ---
 
@@ -95,9 +95,19 @@ The platform includes engineered signatures covering the 6 major threat scenario
 
 ## 🚀 Quickstart Guide
 
-You can run the platform in **Full Docker Cluster Mode** (production ELK stack) or in **Standalone Mode** (zero-overhead local testing).
+> 📖 **Presenting or evaluating this project?** See our step-by-step [Master Presentation & Demo Guide (HOW_TO_RUN_AND_PRESENT.md)](HOW_TO_RUN_AND_PRESENT.md).
 
-### Option A: Standalone Mode (Zero Docker Overhead)
+### Option A: 1-Click Launch on Windows (Recommended)
+Simply double-click:
+```cmd
+START_PROJECT.bat
+```
+* Automatically verifies Python, starts the SOAR Engine and Target Portal, and opens your browser directly to **`http://localhost:8000`**!
+* To stop services anytime: double-click **`STOP_PROJECT.bat`**.
+
+---
+
+### Option B: Standalone Terminal Mode (Linux / Mac / Windows)
 Ideal for presentations, local development, and rapid testing without downloading multi-gigabyte container images.
 
 ```bash
@@ -117,7 +127,7 @@ python run_local_demo.py
 
 ---
 
-### Option B: Full Docker Compose Cluster Mode
+### Option C: Full Docker Compose Cluster Mode
 Launches the full containerized stack including Elasticsearch 8.x, Kibana 8.x, Suricata 7.x, Filebeat 8.x, the SOAR Engine, and the Target Service.
 
 ```bash

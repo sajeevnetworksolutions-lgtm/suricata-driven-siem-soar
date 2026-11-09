@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,50 +9,50 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             brand: {
               50: '#eff6ff',
-              500: '#3b82f6',
-              900: '#1e3a8a',
-            },
-            darkbg: '#0f172a',
-            darkcard: '#1e293b',
-            darkborder: '#334155'
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af'
+            }
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen flex flex-col antialiased">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-  <!-- Header / Navbar -->
-  <header class="bg-[#111827] border-b border-gray-800 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="h-10 w-10 rounded-lg bg-red-600 flex items-center justify-center text-white text-xl shadow-lg shadow-red-500/30">
+  <!-- Header / Navbar (Light Mode) -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3.5">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-lg shadow-md shadow-blue-500/20">
           <i class="fa-solid fa-shield-halved"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          <h1 class="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
             Suricata SIEM + SOAR 
-            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LIVE SENSOR</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300">LIVE SENSOR</span>
           </h1>
-          <p class="text-xs text-gray-400">Automated Threat Detection & Incident Response Platform</p>
+          <p class="text-xs text-slate-500">Automated Threat Detection & Incident Response Platform</p>
         </div>
       </div>
-      <div class="flex items-center space-x-4">
-        <div id="ws-status" class="flex items-center space-x-2 text-xs text-gray-400 bg-gray-800 px-3 py-1.5 rounded-full border border-gray-700">
-          <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+      <div class="flex items-center space-x-3">
+        <div id="ws-status" class="flex items-center space-x-2 text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+          <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
           <span>Connecting WebSocket...</span>
         </div>
-        <button onclick="openManualBanModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition flex items-center gap-1.5">
+        <button onclick="openManualBanModal()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
           <i class="fa-solid fa-ban"></i> Manual IP Quarantine
         </button>
-        <a href="http://localhost:5601" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition flex items-center gap-1.5">
+        <a href="http://localhost:8080" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-crosshairs"></i> Attack Simulator
+        </a>
+        <a href="http://localhost:5601" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
           <i class="fa-solid fa-chart-line"></i> Open Kibana SIEM
         </a>
       </div>
@@ -62,54 +62,54 @@
   <!-- Main Content -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- KPI Metric Cards -->
+    <!-- KPI Metric Cards (Light Mode) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+      <div class="bg-white border border-slate-200 rounded-xl p-4.5 flex items-center justify-between shadow-sm">
         <div>
-          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Total Telemetry</p>
-          <p id="stat-events" class="text-2xl font-bold text-white mt-1">0</p>
+          <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Total Telemetry</p>
+          <p id="stat-events" class="text-2xl font-bold text-slate-900 mt-1">0</p>
         </div>
-        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 text-lg">
+        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 text-lg">
           <i class="fa-solid fa-network-wired"></i>
         </div>
       </div>
 
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+      <div class="bg-white border border-slate-200 rounded-xl p-4.5 flex items-center justify-between shadow-sm">
         <div>
-          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Alerts Detected</p>
-          <p id="stat-alerts" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+          <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Alerts Detected</p>
+          <p id="stat-alerts" class="text-2xl font-bold text-amber-600 mt-1">0</p>
         </div>
-        <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400 text-lg">
+        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl border border-amber-100 text-lg">
           <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
       </div>
 
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+      <div class="bg-white border border-slate-200 rounded-xl p-4.5 flex items-center justify-between shadow-sm">
         <div>
-          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Critical Incidents</p>
-          <p id="stat-critical" class="text-2xl font-bold text-red-500 mt-1">0</p>
+          <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Critical Threats</p>
+          <p id="stat-critical" class="text-2xl font-bold text-red-600 mt-1">0</p>
         </div>
-        <div class="p-3 bg-red-500/10 rounded-lg text-red-400 text-lg">
+        <div class="p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-lg">
           <i class="fa-solid fa-skull-crossbones"></i>
         </div>
       </div>
 
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+      <div class="bg-white border border-slate-200 rounded-xl p-4.5 flex items-center justify-between shadow-sm">
         <div>
-          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">Active IP Bans</p>
-          <p id="stat-bans" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
+          <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Active IP Bans</p>
+          <p id="stat-bans" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
         </div>
-        <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-lg">
+        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 text-lg">
           <i class="fa-solid fa-lock"></i>
         </div>
       </div>
 
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-4 flex items-center justify-between shadow">
+      <div class="bg-white border border-slate-200 rounded-xl p-4.5 flex items-center justify-between shadow-sm">
         <div>
-          <p class="text-xs uppercase tracking-wider font-medium text-gray-400">SOAR Actions</p>
-          <p id="stat-soar" class="text-2xl font-bold text-purple-400 mt-1">0</p>
+          <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">SOAR Actions</p>
+          <p id="stat-soar" class="text-2xl font-bold text-purple-600 mt-1">0</p>
         </div>
-        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 text-lg">
+        <div class="p-3 bg-purple-50 text-purple-600 rounded-xl border border-purple-100 text-lg">
           <i class="fa-solid fa-bolt-lightning"></i>
         </div>
       </div>
@@ -119,48 +119,48 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <!-- Left Column: Active Quarantined IP Blacklist (SOAR Live Action) -->
-      <div class="lg:col-span-1 bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow flex flex-col">
-        <div class="flex items-center justify-between pb-3 border-b border-gray-800">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-shield-virus text-red-400"></i> Active Defense / Quarantined IPs
+      <div class="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-shield-virus text-red-600"></i> Active Defense / Quarantined IPs
           </h2>
-          <span id="active-ban-count" class="text-xs font-mono bg-red-500/20 text-red-400 px-2 py-0.5 rounded border border-red-500/30">0 Active</span>
+          <span id="active-ban-count" class="text-xs font-mono bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full border border-red-200 font-semibold">0 Active</span>
         </div>
         <div class="mt-4 flex-1 overflow-y-auto max-h-[420px] space-y-3" id="bans-container">
-          <div class="text-center py-8 text-xs text-gray-500">No active IP quarantines currently enforced.</div>
+          <div class="text-center py-8 text-xs text-slate-400">No active IP quarantines currently enforced.</div>
         </div>
       </div>
 
       <!-- Right Column: Live Incident Detection Feed -->
-      <div class="lg:col-span-2 bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow flex flex-col">
-        <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+      <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
           <div class="flex items-center gap-2">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-bell text-amber-400"></i> Real-time Security Alert Stream
+            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-bell text-amber-500"></i> Real-time Security Alert Stream
             </h2>
-            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
           </div>
-          <button onclick="clearIncidentList()" class="text-xs text-gray-400 hover:text-white transition">Clear View</button>
+          <button onclick="clearIncidentList()" class="text-xs text-slate-500 hover:text-slate-800 transition font-medium">Clear View</button>
         </div>
 
         <div class="mt-4 flex-1 overflow-y-auto max-h-[420px] space-y-2.5" id="incidents-container">
-          <div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>
+          <div class="text-center py-12 text-xs text-slate-400">Waiting for live security events from Suricata IDS...</div>
         </div>
       </div>
     </div>
 
     <!-- Bottom Section: SOAR Playbook Execution Audit Logs -->
-    <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
-        <h2 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-robot text-purple-400"></i> Automated SOAR Playbook Execution Audit Trail
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-robot text-purple-600"></i> Automated SOAR Playbook Execution Audit Trail
         </h2>
-        <span class="text-xs text-gray-400">Immutable SOAR Engine Log</span>
+        <span class="text-xs text-slate-500 font-medium">Immutable SOAR Engine Log</span>
       </div>
       <div class="mt-4 overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
-            <tr class="text-gray-400 border-b border-gray-800 uppercase tracking-wider font-semibold">
+            <tr class="text-slate-500 border-b border-slate-200 uppercase tracking-wider font-semibold bg-slate-50">
               <th class="py-2.5 px-3">Execution ID</th>
               <th class="py-2.5 px-3">Timestamp</th>
               <th class="py-2.5 px-3">Playbook Name</th>
@@ -170,9 +170,9 @@
               <th class="py-2.5 px-3">Execution Details</th>
             </tr>
           </thead>
-          <tbody id="audit-table-body" class="divide-y divide-gray-800/60 font-mono">
+          <tbody id="audit-table-body" class="divide-y divide-slate-100 font-mono text-slate-700">
             <tr>
-              <td colspan="7" class="py-6 text-center text-gray-500">No automated playbooks executed yet.</td>
+              <td colspan="7" class="py-6 text-center text-slate-400">No automated playbooks executed yet.</td>
             </tr>
           </tbody>
         </table>
@@ -181,44 +181,44 @@
 
   </main>
 
-  <!-- Manual Quarantine Modal -->
-  <div id="manual-ban-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-[#182235] border border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-gray-700 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-ban text-red-500"></i> Manual IP Quarantine
+  <!-- Manual Quarantine Modal (Light Mode) -->
+  <div id="manual-ban-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-ban text-red-600"></i> Manual IP Quarantine
         </h3>
-        <button onclick="closeManualBanModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeManualBanModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block text-gray-300 font-semibold mb-1">Target Attacker IP Address</label>
-          <input id="ban-input-ip" type="text" placeholder="e.g. 192.168.1.100" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white font-mono focus:border-red-500 focus:outline-none">
+          <label class="block text-slate-700 font-semibold mb-1">Target Attacker IP Address</label>
+          <input id="ban-input-ip" type="text" placeholder="e.g. 192.168.1.100" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:border-red-500 focus:outline-none">
         </div>
         <div>
-          <label class="block text-gray-300 font-semibold mb-1">Quarantine TTL (Seconds)</label>
-          <input id="ban-input-ttl" type="number" value="300" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white font-mono focus:border-red-500 focus:outline-none">
+          <label class="block text-slate-700 font-semibold mb-1">Quarantine TTL (Seconds)</label>
+          <input id="ban-input-ttl" type="number" value="300" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:border-red-500 focus:outline-none">
         </div>
         <div>
-          <label class="block text-gray-300 font-semibold mb-1">Reason / Case Reference</label>
-          <input id="ban-input-reason" type="text" value="Manual SOC Quarantine" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white focus:border-red-500 focus:outline-none">
+          <label class="block text-slate-700 font-semibold mb-1">Reason / Case Reference</label>
+          <input id="ban-input-reason" type="text" value="Manual SOC Quarantine" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:border-red-500 focus:outline-none">
         </div>
       </div>
-      <div class="flex justify-end space-x-2 pt-3 border-t border-gray-700">
-        <button onclick="closeManualBanModal()" class="px-4 py-1.5 text-xs text-gray-300 hover:bg-gray-800 rounded">Cancel</button>
-        <button onclick="submitManualBan()" class="px-4 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold rounded shadow">Enforce Quarantine</button>
+      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-200">
+        <button onclick="closeManualBanModal()" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium">Cancel</button>
+        <button onclick="submitManualBan()" class="px-4 py-2 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-sm transition">Enforce Quarantine</button>
       </div>
     </div>
   </div>
 
-  <!-- Threat Intel Modal -->
-  <div id="intel-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-[#182235] border border-gray-700 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-gray-700 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-globe text-blue-400"></i> Threat Intelligence Profile
+  <!-- Threat Intel Modal (Light Mode) -->
+  <div id="intel-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-globe text-blue-600"></i> Threat Intelligence Profile
         </h3>
-        <button onclick="closeIntelModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeIntelModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="intel-modal-content" class="text-xs space-y-3">
         <!-- Injected dynamically -->
@@ -255,12 +255,12 @@
 
       ws.onopen = () => {
         const el = document.getElementById('ws-status');
-        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-emerald-400"></span><span>Connected to SOAR Engine</span>';
+        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-emerald-500"></span><span>Connected to SOAR Engine</span>';
       };
 
       ws.onclose = () => {
         const el = document.getElementById('ws-status');
-        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-red-400 animate-ping"></span><span>Reconnecting...</span>';
+        el.innerHTML = '<span class="h-2 w-2 rounded-full bg-red-500 animate-ping"></span><span>Reconnecting...</span>';
         setTimeout(initWebSocket, 2000);
       };
 
@@ -286,7 +286,7 @@
     function renderIncidents(list) {
       const container = document.getElementById('incidents-container');
       if (!list || list.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>';
+        container.innerHTML = '<div class="text-center py-12 text-xs text-slate-400">Waiting for live security events from Suricata IDS...</div>';
         return;
       }
       container.innerHTML = '';
@@ -303,23 +303,23 @@
       const isCrit = alert.severity === 1;
       const isHigh = alert.severity === 2;
       
-      const badgeColor = isCrit ? 'bg-red-500/20 text-red-400 border-red-500/30' : isHigh ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      const badgeColor = isCrit ? 'bg-red-100 text-red-700 border-red-200' : isHigh ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-blue-100 text-blue-700 border-blue-200';
       const severityLabel = isCrit ? 'SEV-1 CRITICAL' : isHigh ? 'SEV-2 HIGH' : 'SEV-3 MEDIUM';
 
-      card.className = `p-3.5 bg-gray-900/80 border ${isCrit ? 'border-red-900/60' : 'border-gray-800'} rounded-lg hover:border-gray-700 transition flex flex-col gap-2`;
+      card.className = `p-3.5 bg-slate-50 border ${isCrit ? 'border-red-300' : 'border-slate-200'} rounded-xl hover:border-slate-400 transition flex flex-col gap-2 shadow-sm`;
       card.innerHTML = `
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-2">
             <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded border ${badgeColor}">${severityLabel}</span>
-            <span class="text-xs font-bold text-white">${escapeHtml(alert.signature)}</span>
+            <span class="text-xs font-bold text-slate-900">${escapeHtml(alert.signature)}</span>
           </div>
-          <span class="text-[10px] font-mono text-gray-400">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+          <span class="text-[10px] font-mono text-slate-500">${new Date(alert.timestamp).toLocaleTimeString()}</span>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-gray-300 font-mono">
-          <div><span class="text-gray-500">SRC:</span> <button onclick="openThreatIntel('${alert.src_ip}')" class="text-blue-400 hover:underline">${alert.src_ip}:${alert.src_port}</button></div>
-          <div><span class="text-gray-500">DST:</span> <span class="text-gray-200">${alert.dest_ip}:${alert.dest_port}</span></div>
-          <div><span class="text-gray-500">PROTO:</span> <span class="text-purple-400">${alert.proto}</span></div>
-          <div><span class="text-gray-500">MITRE:</span> <span class="text-amber-400">${alert.mitre_tactic || 'TA0043'}</span></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-slate-700 font-mono">
+          <div><span class="text-slate-400">SRC:</span> <button onclick="openThreatIntel('${alert.src_ip}')" class="text-blue-600 font-bold hover:underline">${alert.src_ip}:${alert.src_port}</button></div>
+          <div><span class="text-slate-400">DST:</span> <span class="text-slate-900">${alert.dest_ip}:${alert.dest_port}</span></div>
+          <div><span class="text-slate-400">PROTO:</span> <span class="text-purple-600 font-semibold">${alert.proto}</span></div>
+          <div><span class="text-slate-400">MITRE:</span> <span class="text-amber-600 font-semibold">${alert.mitre_tactic || 'TA0043'}</span></div>
         </div>
       `;
 
@@ -334,23 +334,23 @@
       const container = document.getElementById('bans-container');
       document.getElementById('active-ban-count').textContent = `${list.length} Active`;
       if (!list || list.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-xs text-gray-500">No active IP quarantines currently enforced.</div>';
+        container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">No active IP quarantines currently enforced.</div>';
         return;
       }
       container.innerHTML = '';
       list.forEach(ban => {
         const item = document.createElement('div');
-        item.className = 'p-3 bg-red-950/20 border border-red-900/50 rounded-lg flex items-center justify-between';
+        item.className = 'p-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between shadow-sm';
         item.innerHTML = `
           <div>
             <div class="flex items-center gap-2 font-mono text-xs">
-              <span class="h-2 w-2 rounded-full bg-red-500"></span>
-              <span class="font-bold text-white">${ban.ip}</span>
-              <span class="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded">BLOCKED</span>
+              <span class="h-2 w-2 rounded-full bg-red-600"></span>
+              <span class="font-bold text-slate-900">${ban.ip}</span>
+              <span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-semibold border border-red-200">BLOCKED</span>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1 truncate max-w-[220px]">${ban.reason}</p>
+            <p class="text-[11px] text-slate-600 mt-1 truncate max-w-[220px]">${ban.reason}</p>
           </div>
-          <button onclick="unbanIP('${ban.ip}')" class="bg-gray-800 hover:bg-emerald-700 hover:text-white text-gray-300 text-[11px] px-2.5 py-1 rounded transition border border-gray-700">
+          <button onclick="unbanIP('${ban.ip}')" class="bg-white hover:bg-emerald-600 hover:text-white text-slate-700 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition border border-slate-300 shadow-sm">
             Pardon / Unban
           </button>
         `;
@@ -364,15 +364,15 @@
       tbody.innerHTML = '';
       logs.slice(0, 15).forEach(entry => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-800/40 transition border-b border-gray-800/50';
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
         tr.innerHTML = `
-          <td class="py-2 px-3 text-blue-400 font-bold">${entry.id}</td>
-          <td class="py-2 px-3 text-gray-400">${new Date(entry.timestamp).toLocaleTimeString()}</td>
-          <td class="py-2 px-3 text-white">${entry.playbook_name}</td>
-          <td class="py-2 px-3 text-amber-300">${entry.target_ip}</td>
-          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[10px]">${entry.action_type}</span></td>
-          <td class="py-2 px-3"><span class="text-emerald-400 font-semibold">${entry.status}</span></td>
-          <td class="py-2 px-3 text-gray-400 text-[11px]">${JSON.stringify(entry.details)}</td>
+          <td class="py-2.5 px-3 text-blue-600 font-bold">${entry.id}</td>
+          <td class="py-2.5 px-3 text-slate-500">${new Date(entry.timestamp).toLocaleTimeString()}</td>
+          <td class="py-2.5 px-3 text-slate-900 font-medium">${entry.playbook_name}</td>
+          <td class="py-2.5 px-3 text-amber-700 font-semibold">${entry.target_ip}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-semibold">${entry.action_type}</span></td>
+          <td class="py-2.5 px-3"><span class="text-emerald-600 font-bold">${entry.status}</span></td>
+          <td class="py-2.5 px-3 text-slate-600 text-[11px]">${JSON.stringify(entry.details)}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -410,22 +410,22 @@
       const res = await fetch(`/api/threat-intel/${ip}`).then(r => r.json());
       const content = document.getElementById('intel-modal-content');
       content.innerHTML = `
-        <div class="bg-gray-900 p-4 rounded-lg space-y-2 border border-gray-800">
+        <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
           <div class="flex justify-between items-center">
-            <span class="text-sm font-bold text-white font-mono">${res.ip}</span>
-            <span class="text-xs px-2 py-0.5 rounded ${res.is_malicious ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'} font-bold">
+            <span class="text-sm font-bold text-slate-900 font-mono">${res.ip}</span>
+            <span class="text-xs px-2.5 py-0.5 rounded-full ${res.is_malicious ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-emerald-100 text-emerald-700 border border-emerald-300'} font-bold">
               ${res.is_malicious ? 'MALICIOUS THREAT' : 'LOW RISK / CLEAN'}
             </span>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-xs pt-2 text-gray-300">
-            <div><span class="text-gray-500">Reputation Score:</span> <span class="font-bold text-amber-400">${res.reputation_score}/100</span></div>
-            <div><span class="text-gray-500">Country:</span> <span>${res.country} (${res.country_code})</span></div>
-            <div><span class="text-gray-500">ISP/ASN:</span> <span>${res.isp}</span></div>
-            <div><span class="text-gray-500">Abuse Confidence:</span> <span>${res.abuse_confidence_score}%</span></div>
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 text-slate-700">
+            <div><span class="text-slate-400 font-medium">Reputation Score:</span> <span class="font-bold text-amber-600">${res.reputation_score}/100</span></div>
+            <div><span class="text-slate-400 font-medium">Country:</span> <span>${res.country} (${res.country_code})</span></div>
+            <div><span class="text-slate-400 font-medium">ISP/ASN:</span> <span>${res.isp}</span></div>
+            <div><span class="text-slate-400 font-medium">Abuse Confidence:</span> <span>${res.abuse_confidence_score}%</span></div>
           </div>
           <div class="pt-2">
-            <span class="text-gray-500 text-[11px]">Threat Tags:</span>
-            <div class="flex gap-1 mt-1">${res.tags.map(t => `<span class="bg-gray-800 text-blue-300 px-2 py-0.5 rounded text-[10px] border border-gray-700">${t}</span>`).join('')}</div>
+            <span class="text-slate-400 font-medium text-[11px]">Threat Tags:</span>
+            <div class="flex gap-1 mt-1">${res.tags.map(t => `<span class="bg-white text-blue-700 px-2 py-0.5 rounded text-[10px] border border-slate-300 font-semibold shadow-xs">${t}</span>`).join('')}</div>
           </div>
         </div>
       `;
@@ -437,7 +437,7 @@
     }
 
     function clearIncidentList() {
-      document.getElementById('incidents-container').innerHTML = '<div class="text-center py-12 text-xs text-gray-500">Waiting for live security events from Suricata IDS...</div>';
+      document.getElementById('incidents-container').innerHTML = '<div class="text-center py-12 text-xs text-slate-400">Waiting for live security events from Suricata IDS...</div>';
     }
 
     function escapeHtml(str) {

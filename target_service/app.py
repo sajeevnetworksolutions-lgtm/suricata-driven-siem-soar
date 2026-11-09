@@ -8,7 +8,7 @@ SOAR_URL = os.getenv("SOAR_URL", "http://127.0.0.1:8000")
 
 PORTAL_HTML = """
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,146 +17,145 @@ PORTAL_HTML = """
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            brand: { 500: '#3b82f6', 600: '#2563eb' }
+            brand: { 500: '#2563eb', 600: '#1d4ed8' }
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen antialiased flex flex-col items-center justify-center p-4 sm:p-6">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen antialiased flex flex-col items-center justify-center p-4 sm:p-6">
 
   <div class="max-w-4xl w-full space-y-6">
     
-    <!-- Header Banner -->
-    <div class="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+    <!-- Header Banner (Light Mode) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-red-500/20">
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-md shadow-blue-500/20">
           <i class="fa-solid fa-crosshairs"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold text-white flex items-center gap-2">
+          <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
             Interactive Threat Simulator
-            <span class="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono">LIVE LAB</span>
+            <span class="text-xs bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-mono font-semibold">LIVE LAB</span>
           </h1>
-          <p class="text-xs text-gray-400">Click any button below to fire an attack and watch the SOAR engine react in real time!</p>
+          <p class="text-xs text-slate-500">Click any button below to fire an attack and watch the SOAR engine react in real time!</p>
         </div>
       </div>
-      <a href="http://localhost:8000" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 border border-blue-500/30">
+      <a href="http://localhost:8000" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-2">
         <i class="fa-solid fa-desktop"></i> Open Live SOAR Dashboard
       </a>
     </div>
 
-    <!-- Interactive Attack Launcher Grid -->
+    <!-- Interactive Attack Launcher Grid (Light Mode) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       
       <!-- Attack 1: SQL Injection -->
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow hover:border-red-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-red-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">SQL INJECTION</span>
-            <i class="fa-solid fa-database text-red-400"></i>
+            <span class="text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">SQL INJECTION</span>
+            <i class="fa-solid fa-database text-red-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Database Extraction Attack</h3>
-          <p class="text-xs text-gray-400 mt-1">Sends <code class="text-amber-300 font-mono">' UNION SELECT ...</code> to extract admin credentials.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Database Extraction Attack</h3>
+          <p class="text-xs text-slate-500 mt-1">Sends <code class="text-amber-700 font-mono bg-amber-50 px-1 py-0.5 rounded">' UNION SELECT ...</code> to extract admin credentials.</p>
         </div>
-        <button onclick="triggerAttack('sqli')" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('sqli')" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-play"></i> Trigger SQL Injection
         </button>
       </div>
 
       <!-- Attack 2: Password Brute-Force -->
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow hover:border-amber-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-amber-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">BRUTE FORCE</span>
-            <i class="fa-solid fa-key text-amber-400"></i>
+            <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">BRUTE FORCE</span>
+            <i class="fa-solid fa-key text-amber-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Credential Stuffing Burst</h3>
-          <p class="text-xs text-gray-400 mt-1">Fires 5 rapid login attempts with password dictionaries to trigger HTTP 401s.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Credential Stuffing Burst</h3>
+          <p class="text-xs text-slate-500 mt-1">Fires 5 rapid login attempts with password dictionaries to trigger HTTP 401s.</p>
         </div>
-        <button onclick="triggerAttack('bruteforce')" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('bruteforce')" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-play"></i> Trigger Brute Force
         </button>
       </div>
 
       <!-- Attack 3: Malware C2 Beacon -->
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow hover:border-purple-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-purple-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">MALWARE C2</span>
-            <i class="fa-solid fa-virus text-purple-400"></i>
+            <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full">MALWARE C2</span>
+            <i class="fa-solid fa-virus text-purple-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Botnet C2 Heartbeat</h3>
-          <p class="text-xs text-gray-400 mt-1">Sends an emulated malware check-in beacon to <code class="text-purple-300 font-mono">/api/v1/heartbeat</code>.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Botnet C2 Heartbeat</h3>
+          <p class="text-xs text-slate-500 mt-1">Sends an emulated malware check-in beacon to <code class="text-purple-700 font-mono bg-purple-50 px-1 py-0.5 rounded">/api/v1/heartbeat</code>.</p>
         </div>
-        <button onclick="triggerAttack('c2_beacon')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('c2_beacon')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-play"></i> Send C2 Beacon
         </button>
       </div>
 
       <!-- Attack 4: Cross-Site Scripting (XSS) -->
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow hover:border-blue-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-blue-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">XSS EXPLOIT</span>
-            <i class="fa-solid fa-code text-blue-400"></i>
+            <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">XSS EXPLOIT</span>
+            <i class="fa-solid fa-code text-blue-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Client-Side Script Injection</h3>
-          <p class="text-xs text-gray-400 mt-1">Injects malicious <code class="text-blue-300 font-mono">&lt;script&gt;alert(1)&lt;/script&gt;</code> into the search field.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Client-Side Script Injection</h3>
+          <p class="text-xs text-slate-500 mt-1">Injects malicious <code class="text-blue-700 font-mono bg-blue-50 px-1 py-0.5 rounded">&lt;script&gt;alert(1)&lt;/script&gt;</code> into search.</p>
         </div>
-        <button onclick="triggerAttack('xss')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('xss')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-play"></i> Trigger XSS Attack
         </button>
       </div>
 
       <!-- Attack 5: Data Exfiltration -->
-      <div class="bg-[#131b2e] border border-gray-800 rounded-xl p-5 shadow hover:border-emerald-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-emerald-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">DATA EXFIL</span>
-            <i class="fa-solid fa-file-export text-emerald-400"></i>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">DATA EXFIL</span>
+            <i class="fa-solid fa-file-export text-emerald-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Sensitive Key Exfiltration</h3>
-          <p class="text-xs text-gray-400 mt-1">Transfers an unencrypted RSA Private Key payload to an external endpoint.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Sensitive Key Exfiltration</h3>
+          <p class="text-xs text-slate-500 mt-1">Transfers an unencrypted RSA Private Key payload to an external endpoint.</p>
         </div>
-        <button onclick="triggerAttack('exfil')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('exfil')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-play"></i> Exfiltrate RSA Key
         </button>
       </div>
 
       <!-- Attack 6: Honeypot Canary Link Trap -->
-      <div class="bg-[#1e1528] border border-purple-900/50 rounded-xl p-5 shadow hover:border-pink-500/50 transition flex flex-col justify-between space-y-4">
+      <div class="bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-5 shadow-sm hover:border-pink-400 hover:shadow-md transition flex flex-col justify-between space-y-4">
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20">HONEYPOT TRAP</span>
-            <i class="fa-solid fa-skull text-pink-400"></i>
+            <span class="text-xs font-bold text-pink-700 bg-pink-100 border border-pink-300 px-2.5 py-0.5 rounded-full">HONEYPOT TRAP</span>
+            <i class="fa-solid fa-skull text-pink-500"></i>
           </div>
-          <h3 class="text-sm font-bold text-white mt-2">Canary Token Click Trap</h3>
-          <p class="text-xs text-gray-400 mt-1">Clicking this link simulates an employee or attacker clicking a restricted lure file.</p>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">Canary Token Click Trap</h3>
+          <p class="text-xs text-slate-600 mt-1">Clicking this link simulates an employee or attacker clicking a restricted lure file.</p>
         </div>
-        <a href="/canary/trap?target=Confidential_Employee_Salaries_2026.xlsx" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2 text-center">
+        <a href="/canary/trap?target=Confidential_Employee_Salaries_2026.xlsx" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-center">
           <i class="fa-solid fa-triangle-exclamation"></i> Click Honeypot Trap Link
         </a>
       </div>
 
     </div>
 
-    <!-- Live Execution Terminal / Response Box -->
-    <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2 font-mono">
-          <i class="fa-solid fa-terminal text-emerald-400"></i> Live Defense Response Console
+    <!-- Live Execution Terminal / Response Box (Light Mode) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 font-mono">
+          <i class="fa-solid fa-terminal text-blue-600"></i> Live Defense Response Console
         </h3>
-        <span id="console-status" class="text-[11px] font-mono text-emerald-400">Ready for user input</span>
+        <span id="console-status" class="text-[11px] font-mono text-emerald-600 font-semibold">Ready for user input</span>
       </div>
-      <div id="output-box" class="mt-3 bg-black/60 border border-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 min-h-[140px] max-h-[220px] overflow-y-auto space-y-1">
-        <p class="text-gray-500">// Welcome to the Interactive Cyber Attack Simulation Lab.</p>
-        <p class="text-gray-500">// Click any attack button above or the Canary Trap link to test detection & SOAR response.</p>
+      <div id="output-box" class="mt-3 bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 min-h-[140px] max-h-[220px] overflow-y-auto space-y-1 shadow-inner">
+        <p class="text-slate-400">// Welcome to the Interactive Cyber Attack Simulation Lab.</p>
+        <p class="text-slate-400">// Click any attack button above or the Canary Trap link to test detection & SOAR response.</p>
       </div>
     </div>
 
@@ -167,15 +166,15 @@ PORTAL_HTML = """
       const out = document.getElementById('output-box');
       const status = document.getElementById('console-status');
       
-      status.innerHTML = '<span class="text-amber-400 animate-pulse">Firing Attack Payload...</span>';
-      out.innerHTML += `<p class="text-yellow-400 pt-2 font-bold">>>> [ACTION] Initiating Attack: ${type.toUpperCase()} ...</p>`;
+      status.innerHTML = '<span class="text-amber-400 animate-pulse font-semibold">Firing Attack Payload...</span>';
+      out.innerHTML += `<p class="text-amber-300 pt-2 font-bold">>>> [ACTION] Initiating Attack: ${type.toUpperCase()} ...</p>`;
       out.scrollTop = out.scrollHeight;
 
       try {
         const res = await fetch(`/api/trigger-test/${type}`, { method: 'POST' });
         const data = await res.json();
         
-        status.innerHTML = '<span class="text-emerald-400">Response & Automated Containment Triggered</span>';
+        status.innerHTML = '<span class="text-emerald-400 font-semibold">Response & Automated Containment Triggered</span>';
         out.innerHTML += `
           <p class="text-cyan-300">    [+] Server Payload Response: HTTP ${data.http_status}</p>
           <p class="text-amber-300">    [+] Suricata Signature: "${data.signature}"</p>
@@ -185,7 +184,7 @@ PORTAL_HTML = """
         `;
         out.scrollTop = out.scrollHeight;
       } catch (err) {
-        out.innerHTML += `<p class="text-red-500">[-] Error executing attack: ${err}</p>`;
+        out.innerHTML += `<p class="text-red-400">[-] Error executing attack: ${err}</p>`;
       }
     }
   </script>
@@ -202,25 +201,25 @@ CANARY_TRAP_HTML = """
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#0b0f19] text-gray-200 min-h-screen flex items-center justify-center p-6">
-  <div class="max-w-lg w-full bg-[#182235] border border-red-700/60 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
-    <div class="h-16 w-16 bg-red-600/20 text-red-500 rounded-full flex items-center justify-center mx-auto text-3xl border border-red-500/40 animate-pulse">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-6 antialiased">
+  <div class="max-w-lg w-full bg-white border border-red-200 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+    <div class="h-16 w-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-3xl border border-red-200 animate-pulse">
       <i class="fa-solid fa-hand"></i>
     </div>
-    <h1 class="text-xl font-bold text-white">🚨 HONEYPOT CANARY TRAP TRIPPED!</h1>
-    <p class="text-xs text-gray-300">
+    <h1 class="text-xl font-bold text-slate-900">🚨 HONEYPOT CANARY TRAP TRIPPED!</h1>
+    <p class="text-xs text-slate-600">
       You accessed a restricted honeypot canary resource: <br>
-      <code class="text-amber-300 font-mono font-bold">{{ file_name }}</code>
+      <code class="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-mono font-bold">{{ file_name }}</code>
     </p>
-    <div class="bg-black/50 p-4 rounded-xl text-left font-mono text-xs space-y-1 text-gray-300 border border-gray-800">
-      <p><span class="text-gray-500">Client IP:</span> <span class="text-red-400 font-bold">{{ client_ip }}</span></p>
-      <p><span class="text-gray-500">Timestamp:</span> {{ timestamp }}</p>
-      <p><span class="text-gray-500">SOAR Defense:</span> <span class="text-emerald-400">Automated Quarantine Enforced (300s TTL)</span></p>
-      <p><span class="text-gray-500">Forensics:</span> Case dossier generated for SOC investigation</p>
+    <div class="bg-slate-50 p-4 rounded-xl text-left font-mono text-xs space-y-1.5 text-slate-700 border border-slate-200">
+      <p><span class="text-slate-400">Client IP:</span> <span class="text-red-600 font-bold">{{ client_ip }}</span></p>
+      <p><span class="text-slate-400">Timestamp:</span> {{ timestamp }}</p>
+      <p><span class="text-slate-400">SOAR Defense:</span> <span class="text-emerald-600 font-bold">Automated Quarantine Enforced (300s TTL)</span></p>
+      <p><span class="text-slate-400">Forensics:</span> Case dossier generated for SOC investigation</p>
     </div>
     <div class="pt-2 flex justify-center gap-3">
-      <a href="/" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-xs text-white rounded-lg transition font-semibold">Back to Lab</a>
-      <a href="http://localhost:8000" target="_blank" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-xs text-white rounded-lg transition font-semibold">View in SOAR Dashboard</a>
+      <a href="/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 rounded-lg transition font-semibold border border-slate-300">Back to Lab</a>
+      <a href="http://localhost:8000" target="_blank" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-xs text-white rounded-lg transition font-semibold shadow-sm">View in SOAR Dashboard</a>
     </div>
   </div>
 </body>
@@ -236,9 +235,8 @@ def canary_trap():
     file_name = request.args.get('target', 'Secret_Financial_Records_2026.pdf')
     client_ip = request.remote_addr or "127.0.0.1"
     if client_ip in ["127.0.0.1", "::1"]:
-        client_ip = "192.168.1.99" # Realistic attacker IP for local demo
+        client_ip = "192.168.1.99"
 
-    # Trigger SOAR Canary Alarm
     try:
         requests.post(f"{SOAR_URL}/api/webhook/alert", json={
             "src_ip": client_ip,
@@ -304,7 +302,6 @@ def trigger_test_attack(attack_type):
     item = mapping.get(attack_type, mapping["sqli"])
     src_ip = item["mock_ip"] if client_ip in ["127.0.0.1", "::1"] else client_ip
 
-    # Forward alert to SOAR engine
     try:
         requests.post(f"{SOAR_URL}/api/webhook/alert", json={
             "src_ip": src_ip,

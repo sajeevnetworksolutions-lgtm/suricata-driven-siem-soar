@@ -127,6 +127,9 @@ services:
       context: ./target_service
       dockerfile: Dockerfile
     container_name: siem-target-app
+    environment:
+      - TARGET_PORT=80
+      - SOAR_URL=http://soar-engine:8000
     ports:
       - "8080:80"
       - "2222:22"

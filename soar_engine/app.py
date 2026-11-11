@@ -1,54 +1,106 @@
+import os
+import io
+import csv
+import json
 import asyncio
-from datetime import datetime
+from contextlib import asynccontextmanager
+from typing import Dict, Any, Optional
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, Response
-import csv
-import io
-import json
-
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
 import uvicorn
-import os
 
-from engine import soar_engine
+from engine import soar_engine, utc_now_iso, to_dict
 from playbooks.ip_block import ip_blocker
 from playbooks.threat_intel import enrich_ip
 from config import config
 
-app = FastAPI(title="Suricata SIEM + SOAR Automated Response Hub", version="2.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    eve_task = asyncio.create_task(soar_engine.tail_eve_log())
+    ttl_task = asyncio.create_task(soar_engine.monitor_ban_ttl())
+    try:
+        yield
+    finally:
+        eve_task.cancel()
+        ttl_task.cancel()
+
+
+app = FastAPI(
+    title="Suricata SIEM + SOAR Automated Response Hub",
+    version="2.0.0",
+    lifespan=lifespan
+)
 
 # Mount static files for the SOC UI
-os.makedirs("static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-@app.on_event("startup")
-async def startup_event():
-    # Start background task to tail Suricata EVE logs
-    asyncio.create_task(soar_engine.tail_eve_log())
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard():
-    return FileResponse("static/index.html")
+    return FileResponse(os.path.join(static_dir, "index.html"))
+
 
 @app.get("/api/stats")
 async def get_stats():
     soar_engine.stats.active_banned_ips = len(ip_blocker.get_all_active_bans())
     return soar_engine.stats
 
+
 @app.get("/api/incidents")
 async def get_incidents():
     return soar_engine.incidents
+
 
 @app.get("/api/bans")
 async def get_active_bans():
     return ip_blocker.get_all_active_bans()
 
+
 class ManualBanRequest(BaseModel):
     ip: str
     reason: str = "Manual SOC Analyst Quarantine"
     ttl_seconds: int = 600
+
+
+class PolicyUpdateRequest(BaseModel):
+    auto_ban_enabled: bool
+    ban_threshold_severity: int
+    ban_ttl_seconds: int
+
+
+@app.get("/api/policy")
+async def get_policy():
+    return {
+        "auto_ban_enabled": config.AUTO_BAN_ENABLED,
+        "ban_threshold_severity": config.BAN_THRESHOLD_SEVERITY,
+        "ban_ttl_seconds": config.BAN_TTL_SECONDS
+    }
+
+
+@app.post("/api/policy")
+async def update_policy(req: PolicyUpdateRequest):
+    config.AUTO_BAN_ENABLED = req.auto_ban_enabled
+    config.BAN_THRESHOLD_SEVERITY = max(1, min(3, req.ban_threshold_severity))
+    config.BAN_TTL_SECONDS = max(30, min(86400, req.ban_ttl_seconds))
+    soar_engine.record_playbook_action(
+        playbook_name="PolicyConfigUpdate",
+        target_ip="SYSTEM",
+        action_type="POLICY_UPDATE",
+        status="SUCCESS",
+        details={
+            "auto_ban_enabled": config.AUTO_BAN_ENABLED,
+            "ban_threshold_severity": config.BAN_THRESHOLD_SEVERITY,
+            "ban_ttl_seconds": config.BAN_TTL_SECONDS
+        }
+    )
+    return {"status": "updated", **await get_policy()}
+
 
 @app.post("/api/bans")
 async def manual_ban(req: ManualBanRequest):
@@ -66,15 +118,16 @@ async def manual_ban(req: ManualBanRequest):
         status="SUCCESS",
         details={"reason": req.reason, "ttl": req.ttl_seconds}
     )
-    await soar_engine.broadcast_event("MANUAL_BAN", ban.dict())
+    await soar_engine.broadcast_event("MANUAL_BAN", to_dict(ban))
     return {"status": "success", "ban": ban}
+
 
 @app.delete("/api/bans/{ip}")
 async def manual_unban(ip: str):
     ban = ip_blocker.unban_ip(ip, reason="Manual SOC Analyst Pardon")
     if not ban:
         raise HTTPException(status_code=404, detail="IP not actively banned")
-    
+
     soar_engine.record_playbook_action(
         playbook_name="ManualAnalystPardon",
         target_ip=ip,
@@ -85,20 +138,52 @@ async def manual_unban(ip: str):
     await soar_engine.broadcast_event("MANUAL_UNBAN", {"ip": ip})
     return {"status": "success", "message": f"IP {ip} unbanned"}
 
+
+@app.post("/api/bans/{ip}/extend")
+async def extend_ban_duration(ip: str):
+    existing = ip_blocker.active_bans.get(ip)
+    reason = existing.reason if existing else "Manual SOC Analyst Quarantine Extension (+600s)"
+    sig = existing.associated_signature if existing else "Quarantine Extension"
+    ban = ip_blocker.ban_ip(
+        ip=ip,
+        reason=reason,
+        signature=sig,
+        severity=1,
+        ttl_seconds=600
+    )
+    soar_engine.record_playbook_action(
+        playbook_name="ManualQuarantineExtension",
+        target_ip=ip,
+        action_type="BAN_EXTEND",
+        status="SUCCESS",
+        details={"ip": ip, "new_ttl": 600}
+    )
+    await soar_engine.broadcast_event("BAN_UPDATE", to_dict(ban))
+    return {"status": "success", "ban": ban}
+
+
 @app.get("/api/threat-intel/{ip}")
 async def lookup_threat_intel(ip: str):
     return enrich_ip(ip)
+
 
 @app.get("/api/audit-logs")
 async def get_audit_logs():
     return soar_engine.audit_logs
 
+
 @app.post("/api/webhook/alert")
 async def incoming_siem_webhook(alert_payload: Dict[str, Any]):
-    """Receives alerts from external SIEM / Kibana Watcher and triggers SOAR pipeline."""
-    ts = alert_payload.get("timestamp")
-    if not ts:
-        ts = datetime.utcnow().isoformat()
+    """Receives alerts from external SIEM / Kibana Watcher / Target App and triggers SOAR pipeline."""
+    ts = alert_payload.get("timestamp") or utc_now_iso()
+    mitre_tactic = alert_payload.get("mitre_tactic") or alert_payload.get("tactic")
+    mitre_technique = alert_payload.get("mitre_technique") or alert_payload.get("technique")
+
+    metadata: Dict[str, Any] = {}
+    if mitre_tactic:
+        metadata["mitre_tactic_id"] = [mitre_tactic]
+    if mitre_technique:
+        metadata["mitre_technique_id"] = [mitre_technique]
 
     eve_format = {
         "event_type": "alert",
@@ -108,14 +193,17 @@ async def incoming_siem_webhook(alert_payload: Dict[str, Any]):
         "dest_ip": alert_payload.get("dest_ip", alert_payload.get("destination", {}).get("ip", "127.0.0.1")),
         "dest_port": alert_payload.get("dest_port", alert_payload.get("destination", {}).get("port", 80)),
         "proto": alert_payload.get("proto", "TCP"),
+        "payload": alert_payload.get("payload"),
         "alert": {
             "signature": alert_payload.get("rule_name", alert_payload.get("signature", "External SIEM Triggered Alert")),
             "severity": alert_payload.get("severity", 1),
-            "category": alert_payload.get("category", "SIEM-Correlation")
+            "category": alert_payload.get("category", "SIEM-Correlation"),
+            "metadata": metadata
         }
     }
     await soar_engine.handle_alert_event(eve_format)
     return {"status": "processed", "message": "Alert fed into SOAR automation pipeline"}
+
 
 SIMULATED_ATTACKS = {
     "sqli": {
@@ -155,7 +243,7 @@ SIMULATED_ATTACKS = {
         "proto": "TCP",
         "mitre_tactic": "TA0011 - Command and Control",
         "mitre_technique": "T1071.001 - Web Protocols Beaconing",
-        "payload": "POST /api/v1/heartbeat HTTP/1.1\\r\\nHost: c2.apt29-adversary.org\\r\\nX-Beacon-Id: CS-0xDEADBEEF"
+        "payload": "POST /api/v1/heartbeat HTTP/1.1\r\nHost: c2.apt29-adversary.org\r\nX-Beacon-Id: CS-0xDEADBEEF"
     },
     "portscan": {
         "signature": "SIEM-RECON: High-Rate TCP SYN Port Sweep Detected (Nmap / Masscan)",
@@ -181,7 +269,7 @@ SIMULATED_ATTACKS = {
         "proto": "TCP",
         "mitre_tactic": "TA0010 - Exfiltration",
         "mitre_technique": "T1048 - Exfiltration Over Alternative Protocol",
-        "payload": "-----BEGIN RSA PRIVATE KEY-----\\nMIIEowIBAAKCAQEA0lX..."
+        "payload": "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0lX..."
     },
     "dns_tunnel": {
         "signature": "SIEM-DNS: DNS Tunneling Exfiltration via Oversized Base64 Query",
@@ -211,14 +299,15 @@ SIMULATED_ATTACKS = {
     }
 }
 
+
 @app.post("/api/simulate/{scenario}")
 async def simulate_attack_scenario(scenario: str):
     if scenario not in SIMULATED_ATTACKS:
         raise HTTPException(status_code=400, detail=f"Unknown scenario. Choose from: {list(SIMULATED_ATTACKS.keys())}")
-    
+
     spec = SIMULATED_ATTACKS[scenario]
-    now_iso = datetime.utcnow().isoformat()
-    
+    now_iso = utc_now_iso()
+
     eve_format = {
         "event_type": "alert",
         "timestamp": now_iso,
@@ -238,17 +327,22 @@ async def simulate_attack_scenario(scenario: str):
             }
         }
     }
-    
-    # Process through SOAR pipeline
+
     await soar_engine.handle_alert_event(eve_format)
-    
-    # Also log to file so EVE file reflects the event
+
     try:
-        with open(config.EVE_LOG_PATH, "a") as f:
-            f.write(json.dumps(eve_format) + "\\n")
+        os.makedirs(os.path.dirname(config.EVE_LOG_PATH), exist_ok=True)
+        with open(config.EVE_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(eve_format) + "\n")
     except Exception:
         pass
-        
+
+    containment = (
+        f"Quarantined {spec['src_ip']} ({config.BAN_TTL_SECONDS}s TTL) + Case File Created"
+        if (config.AUTO_BAN_ENABLED and spec["severity"] <= config.BAN_THRESHOLD_SEVERITY)
+        else "Enriched + Forensic Case Created"
+    )
+
     return {
         "status": "success",
         "scenario": scenario,
@@ -256,18 +350,29 @@ async def simulate_attack_scenario(scenario: str):
         "attacker_ip": spec["src_ip"],
         "mitre_tactic": spec["mitre_tactic"],
         "mitre_technique": spec["mitre_technique"],
-        "containment_action": f"Quarantined {spec['src_ip']} (300s TTL) + Case File Created"
+        "containment_action": containment
     }
+
 
 @app.post("/api/incidents/clear")
 async def clear_all_incidents():
-    soar_engine.incidents.clear()
-    soar_engine.audit_logs.clear()
-    soar_engine.stats.total_alerts_detected = 0
-    soar_engine.stats.critical_alerts = 0
-    soar_engine.stats.high_alerts = 0
-    await soar_engine.broadcast_event("STATS_UPDATE", soar_engine.stats.dict())
+    soar_engine.clear_state()
+    await soar_engine.broadcast_event("STATS_UPDATE", to_dict(soar_engine.stats))
     return {"status": "cleared"}
+
+
+@app.get("/api/case/{incident_id}")
+async def download_case_dossier(incident_id: str):
+    inc = next((i for i in soar_engine.incidents if i.id == incident_id), None)
+    if not inc:
+        raise HTTPException(status_code=404, detail="Incident case not found")
+    content = json.dumps(to_dict(inc), indent=2)
+    return Response(
+        content=content,
+        media_type="application/json",
+        headers={"Content-Disposition": f"attachment; filename=case_{incident_id[:8]}.json"}
+    )
+
 
 @app.get("/api/export/csv")
 async def export_incidents_csv():
@@ -276,32 +381,13 @@ async def export_incidents_csv():
     writer.writerow(["Incident ID", "Timestamp", "Severity", "Signature", "Category", "Source IP", "Source Port", "Dest IP", "Dest Port", "Protocol", "MITRE Tactic", "MITRE Technique"])
     for inc in soar_engine.incidents:
         writer.writerow([inc.id, inc.timestamp, inc.severity, inc.signature, inc.category, inc.src_ip, inc.src_port, inc.dest_ip, inc.dest_port, inc.proto, inc.mitre_tactic, inc.mitre_technique])
-    
-    csv_data = output.getvalue()
+
     return Response(
-        content=csv_data,
+        content=output.getvalue(),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=suricata_soar_incidents.csv"}
     )
 
-@app.post("/api/bans/{ip}/extend")
-async def extend_ban_duration(ip: str):
-    ban = ip_blocker.ban_ip(
-        ip=ip,
-        reason="Manual SOC Analyst Quarantine Extension (+600s)",
-        signature="Quarantine Extension",
-        severity=1,
-        ttl_seconds=600
-    )
-    soar_engine.record_playbook_action(
-        playbook_name="ManualQuarantineExtension",
-        target_ip=ip,
-        action_type="BAN_EXTEND",
-        status="SUCCESS",
-        details={"ip": ip, "new_ttl": 600}
-    )
-    await soar_engine.broadcast_event("BAN_UPDATE", ban.dict())
-    return {"status": "success", "ban": ban}
 
 @app.websocket("/ws/live")
 async def websocket_live_stream(websocket: WebSocket):
@@ -313,7 +399,9 @@ async def websocket_live_stream(websocket: WebSocket):
             msg = await queue.get()
             await websocket.send_text(msg)
     except WebSocketDisconnect:
-        soar_engine.websocket_subscribers.remove(queue)
+        if queue in soar_engine.websocket_subscribers:
+            soar_engine.websocket_subscribers.remove(queue)
+
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)

@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 from models import IncidentAlert
 from config import config
@@ -11,12 +11,13 @@ logger = logging.getLogger("soar.playbook.forensic_dump")
 def create_forensic_dossier(alert: IncidentAlert) -> str:
     """Creates a structured forensic case file with network payload, headers, and metadata."""
     os.makedirs(os.path.join(config.DATA_DIR, "forensics"), exist_ok=True)
-    case_id = f"CASE-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{alert.id[:8]}"
+    now_utc = datetime.now(timezone.utc)
+    case_id = f"CASE-{now_utc.strftime('%Y%m%d%H%M%S')}-{alert.id[:8]}"
     file_path = os.path.join(config.DATA_DIR, "forensics", f"{case_id}.json")
     
     dossier = {
         "case_id": case_id,
-        "investigation_opened_at": datetime.utcnow().isoformat(),
+        "investigation_opened_at": now_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "triggering_alert": {
             "id": alert.id,
             "timestamp": alert.timestamp,
@@ -29,12 +30,12 @@ def create_forensic_dossier(alert: IncidentAlert) -> str:
             "mitre_tactic": alert.mitre_tactic,
             "mitre_technique": alert.mitre_technique
         },
-        "threat_intelligence": alert.threat_intel.dict() if alert.threat_intel else None,
+        "threat_intelligence": (alert.threat_intel.model_dump() if hasattr(alert.threat_intel, "model_dump") else alert.threat_intel.dict()) if alert.threat_intel else None,
         "raw_eve_payload": alert.raw_event
     }
     
-    with open(file_path, "w") as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dossier, f, indent=2)
         
-    logger.info(f"📁 [SOAR-FORENSICS] Forensic Case Dossier created at: {file_path}")
+    logger.info(f"[SOAR-FORENSICS] Forensic Case Dossier created at: {file_path}")
     return case_id

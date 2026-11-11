@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template_string
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 app = Flask(__name__)
@@ -145,7 +145,7 @@ PORTAL_HTML = """
 
     </div>
 
-    <!-- Live Execution Terminal / Response Box (Light Mode) -->
+    <!-- Live Execution Terminal / Response Box (Pure Light Mode) -->
     <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 font-mono">
@@ -153,9 +153,9 @@ PORTAL_HTML = """
         </h3>
         <span id="console-status" class="text-[11px] font-mono text-emerald-600 font-semibold">Ready for user input</span>
       </div>
-      <div id="output-box" class="mt-3 bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 min-h-[140px] max-h-[220px] overflow-y-auto space-y-1 shadow-inner">
-        <p class="text-slate-400">// Welcome to the Interactive Cyber Attack Simulation Lab.</p>
-        <p class="text-slate-400">// Click any attack button above or the Canary Trap link to test detection & SOAR response.</p>
+      <div id="output-box" class="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-xs text-slate-800 min-h-[140px] max-h-[220px] overflow-y-auto space-y-1 shadow-inner">
+        <p class="text-slate-500">// Welcome to the Interactive Cyber Attack Simulation Lab.</p>
+        <p class="text-slate-500">// Click any attack button above or the Canary Trap link to test detection &amp; SOAR response.</p>
       </div>
     </div>
 
@@ -166,25 +166,25 @@ PORTAL_HTML = """
       const out = document.getElementById('output-box');
       const status = document.getElementById('console-status');
       
-      status.innerHTML = '<span class="text-amber-400 animate-pulse font-semibold">Firing Attack Payload...</span>';
-      out.innerHTML += `<p class="text-amber-300 pt-2 font-bold">>>> [ACTION] Initiating Attack: ${type.toUpperCase()} ...</p>`;
+      status.innerHTML = '<span class="text-amber-600 animate-pulse font-semibold">Firing Attack Payload...</span>';
+      out.innerHTML += `<p class="text-amber-700 pt-2 font-bold">&gt;&gt;&gt; [ACTION] Initiating Attack: ${type.toUpperCase()} ...</p>`;
       out.scrollTop = out.scrollHeight;
 
       try {
         const res = await fetch(`/api/trigger-test/${type}`, { method: 'POST' });
         const data = await res.json();
         
-        status.innerHTML = '<span class="text-emerald-400 font-semibold">Response & Automated Containment Triggered</span>';
+        status.innerHTML = '<span class="text-emerald-600 font-semibold">Response &amp; Automated Containment Triggered</span>';
         out.innerHTML += `
-          <p class="text-cyan-300">    [+] Server Payload Response: HTTP ${data.http_status}</p>
-          <p class="text-amber-300">    [+] Suricata Signature: "${data.signature}"</p>
-          <p class="text-red-400 font-bold">    [🚨 SOAR REACTION] ${data.soar_action}</p>
-          <p class="text-purple-300">    [+] Threat Intel IP: ${data.src_ip} | Score: ${data.intel_score}/100</p>
-          <p class="text-emerald-400">    [✔] Live Dashboard updated at: <a href="http://localhost:8000" target="_blank" class="underline">http://localhost:8000</a></p>
+          <p class="text-blue-700">    [+] Server Payload Response: HTTP ${data.http_status}</p>
+          <p class="text-amber-700">    [+] Suricata Signature: "${data.signature}"</p>
+          <p class="text-red-700 font-bold">    [SOAR REACTION] ${data.soar_action}</p>
+          <p class="text-purple-700">    [+] Threat Intel IP: ${data.src_ip} | Score: ${data.intel_score}/100</p>
+          <p class="text-emerald-700 font-semibold">    [OK] Live Dashboard updated at: <a href="http://localhost:8000" target="_blank" class="underline">http://localhost:8000</a></p>
         `;
         out.scrollTop = out.scrollHeight;
       } catch (err) {
-        out.innerHTML += `<p class="text-red-400">[-] Error executing attack: ${err}</p>`;
+        out.innerHTML += `<p class="text-red-600 font-semibold">[-] Error executing attack: ${err}</p>`;
       }
     }
   </script>
@@ -237,20 +237,26 @@ def canary_trap():
     if client_ip in ["127.0.0.1", "::1"]:
         client_ip = "192.168.1.99"
 
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
     try:
         requests.post(f"{SOAR_URL}/api/webhook/alert", json={
             "src_ip": client_ip,
             "dest_ip": "127.0.0.1",
+            "dest_port": 8080,
+            "proto": "HTTP",
             "signature": f"SIEM-HONEYPOT: Restricted Canary File Access Attempt ({file_name})",
-            "category": "Policy-Violation",
+            "category": "Deception-Detection",
             "severity": 1,
-            "mitre_tactic": "TA0001",
-            "mitre_technique": "T1190"
+            "mitre_tactic": "TA0007 - Discovery",
+            "mitre_technique": "T1083 - File and Directory Discovery",
+            "payload": f"GET /canary/trap?target={file_name} HTTP/1.1",
+            "timestamp": now_iso
         }, timeout=2)
     except Exception:
         pass
 
-    return render_template_string(CANARY_TRAP_HTML, file_name=file_name, client_ip=client_ip, timestamp=datetime.utcnow().isoformat())
+    return render_template_string(CANARY_TRAP_HTML, file_name=file_name, client_ip=client_ip, timestamp=now_iso)
 
 @app.route('/api/trigger-test/<attack_type>', methods=['POST'])
 def trigger_test_attack(attack_type):
@@ -263,6 +269,9 @@ def trigger_test_attack(attack_type):
             "category": "Web-Application-Attack",
             "mock_ip": "192.168.1.150",
             "intel_score": 90,
+            "mitre_tactic": "TA0001 - Initial Access",
+            "mitre_technique": "T1190 - Exploit Public-Facing Application",
+            "payload": "GET /search?q=1' UNION SELECT null,username,password FROM users-- HTTP/1.1",
             "action": "Quarantined IP 192.168.1.150 (300s TTL) + Case File Created"
         },
         "bruteforce": {
@@ -271,6 +280,9 @@ def trigger_test_attack(attack_type):
             "category": "Attempted-Admin",
             "mock_ip": "172.28.0.105",
             "intel_score": 85,
+            "mitre_tactic": "TA0006 - Credential Access",
+            "mitre_technique": "T1110.001 - Password Guessing",
+            "payload": "POST /login HTTP/1.1 [x5 401 Unauthorized bursts for user 'admin']",
             "action": "Quarantined IP 172.28.0.105 (300s TTL) + Auth Alert Sent"
         },
         "c2_beacon": {
@@ -279,6 +291,9 @@ def trigger_test_attack(attack_type):
             "category": "Trojan-Activity",
             "mock_ip": "172.28.0.200",
             "intel_score": 88,
+            "mitre_tactic": "TA0011 - Command and Control",
+            "mitre_technique": "T1071.001 - Web Protocols Beaconing",
+            "payload": "POST /api/v1/heartbeat HTTP/1.1\r\nbeacon_id=BOTNET-77&cmd=POLL",
             "action": "Quarantined C2 IP 172.28.0.200 (300s TTL) + Tagged as Botnet Host"
         },
         "xss": {
@@ -286,7 +301,10 @@ def trigger_test_attack(attack_type):
             "severity": 2,
             "category": "Web-Application-Attack",
             "mock_ip": "198.51.100.55",
-            "intel_score": 65,
+            "intel_score": 72,
+            "mitre_tactic": "TA0002 - Execution",
+            "mitre_technique": "T1059.007 - JavaScript",
+            "payload": "GET /search?q=<script>alert(document.cookie)</script> HTTP/1.1",
             "action": "Flagged High-Risk XSS Attempt & Enriched Source IP"
         },
         "exfil": {
@@ -295,21 +313,30 @@ def trigger_test_attack(attack_type):
             "category": "Policy-Violation",
             "mock_ip": "172.28.0.110",
             "intel_score": 92,
+            "mitre_tactic": "TA0010 - Exfiltration",
+            "mitre_technique": "T1048 - Exfiltration Over Alternative Protocol",
+            "payload": "POST /upload?file=id_rsa\r\n-----BEGIN RSA PRIVATE KEY-----",
             "action": "Quarantined IP 172.28.0.110 (300s TTL) + Forensic Evidence Dumped"
         }
     }
 
     item = mapping.get(attack_type, mapping["sqli"])
     src_ip = item["mock_ip"] if client_ip in ["127.0.0.1", "::1"] else client_ip
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     try:
         requests.post(f"{SOAR_URL}/api/webhook/alert", json={
             "src_ip": src_ip,
             "dest_ip": "127.0.0.1",
+            "dest_port": 8080,
+            "proto": "HTTP",
             "signature": item["signature"],
             "category": item["category"],
             "severity": item["severity"],
-            "timestamp": datetime.utcnow().isoformat()
+            "mitre_tactic": item["mitre_tactic"],
+            "mitre_technique": item["mitre_technique"],
+            "payload": item["payload"],
+            "timestamp": now_iso
         }, timeout=2)
     except Exception:
         pass

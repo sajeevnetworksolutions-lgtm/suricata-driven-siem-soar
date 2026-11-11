@@ -16,20 +16,19 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [*] Verifying dependencies (FastAPI, Uvicorn, Flask, Requests)...
-python -c "import fastapi, uvicorn, flask, requests, pydantic" >nul 2>&1
+echo [*] Verifying dependencies (FastAPI, Uvicorn, Flask, Requests, WebSockets)...
+python -c "import fastapi, uvicorn, flask, requests, pydantic, websockets" >nul 2>&1
 if %errorlevel% neq 0 (
     echo [*] Installing required lightweight dependencies...
-    pip install fastapi uvicorn flask requests pydantic
+    pip install fastapi uvicorn flask requests pydantic websockets
 )
 
 echo.
 echo [OK] Dependencies verified.
 echo [*] Starting SOAR Engine (:8000) and Attack Simulation Portal (:8080)...
+echo [*] Browser will open automatically once both servers are healthy.
 echo.
 
-start "" "http://localhost:8000"
-
-python run_local_demo.py
+python run_local_demo.py --open-browser
 
 pause

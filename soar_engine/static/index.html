@@ -25,7 +25,6 @@
               500: '#2563eb',
               600: '#1d4ed8',
               700: '#1e40af',
-              800: '#1e3a8a',
             }
           }
         }
@@ -33,33 +32,22 @@
     }
   </script>
   <style>
-    /* Custom scrollbar for modern light UI */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    
-    .pulse-ring {
-      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
-      animation: pulse-animation 2s infinite;
-    }
-    @keyframes pulse-animation {
-      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-blue-900">
 
   <!-- Floating Toast Notification Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2 pointer-events-none max-w-sm w-full"></div>
 
-  <!-- Top Enterprise Navbar -->
-  <header class="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/95">
+  <!-- Top Enterprise Navbar (100% Pure Light Theme) -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- Brand & Live Pill -->
+      <!-- Brand & Live Sensor Badge -->
       <div class="flex items-center space-x-3.5">
         <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white text-lg shadow-md shadow-blue-500/20">
           <i class="fa-solid fa-shield-halved"></i>
@@ -69,81 +57,78 @@
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900">
               Suricata SIEM + SOAR
             </h1>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span id="ws-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               AUTONOMOUS ACTIVE
             </span>
           </div>
-          <p class="text-[11px] text-slate-500">Autonomous Incident Response & Threat Containment System</p>
+          <p class="text-[11px] text-slate-500">Autonomous Incident Response & Threat Containment Center</p>
         </div>
       </div>
 
       <!-- Navigation & Action Controls -->
       <div class="flex items-center flex-wrap gap-2">
-        
-        <!-- Audio Chime Toggle -->
         <button id="sound-toggle-btn" onclick="toggleSound()" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-200 flex items-center gap-1.5" title="Toggle Audio Radar Chime">
           <i id="sound-icon" class="fa-solid fa-volume-high text-blue-600"></i>
           <span id="sound-text">Sound: ON</span>
         </button>
 
-        <!-- Export CSV Button -->
-        <a href="/api/export/csv" download class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-sm flex items-center gap-1.5">
+        <button onclick="openPolicyModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-indigo-600"></i> SOAR Policy
+        </button>
+
+        <a href="/api/export/csv" download class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5">
           <i class="fa-solid fa-file-csv text-emerald-600"></i> Export CSV
         </a>
 
-        <!-- Clear Stream Button -->
         <button onclick="clearIncidentStream()" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-200 flex items-center gap-1.5">
           <i class="fa-solid fa-eraser"></i> Clear View
         </button>
 
-        <!-- Manual Quarantine Modal Trigger -->
         <button onclick="openManualBanModal()" class="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition flex items-center gap-1.5">
           <i class="fa-solid fa-ban"></i> Manual Ban
         </button>
 
-        <!-- External Attack Lab Link -->
-        <a href="http://localhost:8080" target="_blank" class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition flex items-center gap-1.5">
+        <a href="http://localhost:8080" target="_blank" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-1.5">
           <i class="fa-solid fa-crosshairs"></i> Attack Lab (:8080)
         </a>
       </div>
     </div>
   </header>
 
-  <!-- Interactive Quick Threat Injection Bar (One-Click Lab) -->
-  <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-indigo-900/50 py-2.5 px-4 sm:px-6 shadow-inner">
+  <!-- Interactive 1-Click Threat Simulator Ribbon (Pure Light Theme) -->
+  <section class="bg-gradient-to-r from-indigo-50/90 via-blue-50/80 to-slate-100 text-slate-800 border-b border-indigo-200/70 py-2.5 px-4 sm:px-6">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-2 text-xs font-semibold text-indigo-200 shrink-0">
+      <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 shrink-0">
         <span class="flex h-2 w-2 relative">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
         </span>
-        <i class="fa-solid fa-bolt text-amber-400"></i>
+        <i class="fa-solid fa-bolt text-amber-500"></i>
         <span>1-Click Threat Simulator:</span>
       </div>
 
-      <!-- Quick Action Buttons -->
       <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
-        <button onclick="simulateAttack('sqli', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-red-500/20 hover:bg-red-500/40 text-red-200 border border-red-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-database text-red-400"></i> SQL Injection
+        <button onclick="simulateAttack('sqli', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-red-50 text-red-700 border border-red-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-database text-red-500"></i> SQL Injection
         </button>
-        <button onclick="simulateAttack('bruteforce', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-amber-500/20 hover:bg-amber-500/40 text-amber-200 border border-amber-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-key text-amber-400"></i> SSH Brute-Force
+        <button onclick="simulateAttack('bruteforce', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-key text-amber-500"></i> SSH Brute-Force
         </button>
-        <button onclick="simulateAttack('c2_beacon', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 border border-purple-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-virus text-purple-400"></i> Cobalt Strike C2
+        <button onclick="simulateAttack('c2_beacon', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-virus text-purple-500"></i> Cobalt Strike C2
         </button>
-        <button onclick="simulateAttack('portscan', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 border border-blue-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-radar text-blue-400"></i> Port Sweep Scan
+        <button onclick="simulateAttack('portscan', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-radar text-blue-500"></i> Port Sweep Scan
         </button>
-        <button onclick="simulateAttack('exfil', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 border border-emerald-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-file-export text-emerald-400"></i> RSA Key Exfil
+        <button onclick="simulateAttack('exfil', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-file-export text-emerald-500"></i> RSA Key Exfil
         </button>
-        <button onclick="simulateAttack('dns_tunnel', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-200 border border-cyan-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-network-wired text-cyan-400"></i> DNS Tunnel
+        <button onclick="simulateAttack('dns_tunnel', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-network-wired text-cyan-600"></i> DNS Tunnel
         </button>
-        <button onclick="simulateAttack('canary_trap', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-pink-500/20 hover:bg-pink-500/40 text-pink-200 border border-pink-500/40 rounded-md transition flex items-center gap-1">
-          <i class="fa-solid fa-skull text-pink-400"></i> Canary Token
+        <button onclick="simulateAttack('canary_trap', this)" class="px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-pink-50 text-pink-700 border border-pink-200 rounded-lg transition shadow-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-skull text-pink-500"></i> Canary Token
         </button>
       </div>
     </div>
@@ -155,7 +140,6 @@
     <!-- KPI Metric Cards (5 Columns) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       
-      <!-- Total Ingested -->
       <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Telemetry Events</p>
@@ -170,7 +154,6 @@
         </div>
       </div>
 
-      <!-- Alerts Detected -->
       <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Alerts Detected</p>
@@ -186,7 +169,6 @@
         </div>
       </div>
 
-      <!-- Autonomous Containments -->
       <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">SOAR Playbooks</p>
@@ -201,7 +183,6 @@
         </div>
       </div>
 
-      <!-- Active Quarantined IPs -->
       <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Quarantined IPs</p>
@@ -216,7 +197,6 @@
         </div>
       </div>
 
-      <!-- Mean Response Time (SLA) -->
       <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase tracking-wider font-semibold text-slate-500">Containment MTTR</p>
@@ -224,10 +204,10 @@
             <i class="fa-solid fa-bolt-lightning"></i>
           </div>
         </div>
-        <p id="stat-latency" class="text-2xl font-bold text-emerald-600 mt-2 font-mono">118 ms</p>
+        <p id="stat-latency" class="text-2xl font-bold text-emerald-600 mt-2 font-mono">118.4 ms</p>
         <div class="mt-2 flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
           <i class="fa-solid fa-circle-check"></i>
-          <span>SLA &lt; 500ms Met</span>
+          <span>Enterprise SLA &lt; 500ms</span>
         </div>
       </div>
 
@@ -236,7 +216,6 @@
     <!-- Live Analytics & Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- Chart 1: MITRE ATT&CK Tactics Distribution -->
       <div class="lg:col-span-2 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
@@ -245,14 +224,13 @@
             </h2>
             <p class="text-xs text-slate-500">Real-time classification across adversary lifecycle stages</p>
           </div>
-          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">v14.1 Matrix</span>
+          <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">ATT&CK Matrix</span>
         </div>
         <div class="mt-4 h-52">
           <canvas id="mitreChart"></canvas>
         </div>
       </div>
 
-      <!-- Chart 2: Threat Severity Breakdown -->
       <div class="lg:col-span-1 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
@@ -269,7 +247,7 @@
 
     </div>
 
-    <!-- Dual Operations Panel: Active Defense (Left) & Live Alert Stream (Right) -->
+    <!-- Dual Operations Panel -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <!-- Left Column: Active Defense & Quarantined IPs -->
@@ -284,7 +262,6 @@
           <span id="active-ban-badge" class="text-xs font-mono bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full border border-red-200 font-semibold">0 Active</span>
         </div>
 
-        <!-- Quarantined IPs Container -->
         <div class="mt-4 flex-1 overflow-y-auto max-h-[460px] space-y-3" id="bans-container">
           <div class="text-center py-12 text-xs text-slate-400">
             <i class="fa-solid fa-shield-check text-slate-300 text-3xl mb-2 block"></i>
@@ -296,7 +273,6 @@
       <!-- Right Column: Real-Time Security Incident Stream -->
       <div class="lg:col-span-2 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
         
-        <!-- Stream Header with Filters -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
           <div class="flex items-center gap-2">
             <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -305,7 +281,6 @@
             <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping" title="Sensor Live"></span>
           </div>
 
-          <!-- Search & Filter Controls -->
           <div class="flex items-center gap-2">
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
@@ -320,7 +295,6 @@
           </div>
         </div>
 
-        <!-- Incidents List Container -->
         <div class="mt-4 flex-1 overflow-y-auto max-h-[460px] space-y-2.5" id="incidents-container">
           <div class="text-center py-16 text-xs text-slate-400">
             <i class="fa-solid fa-radar text-slate-300 text-3xl mb-2 block animate-pulse"></i>
@@ -338,30 +312,27 @@
           <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
             <i class="fa-solid fa-clipboard-check text-purple-600"></i> Autonomous Playbook Execution Audit Trail
           </h2>
-          <p class="text-xs text-slate-500">Cryptographically verifiable, immutable record of automated actions taken</p>
+          <p class="text-xs text-slate-500">Immutable record of automated containment and enrichment playbooks</p>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 font-mono">SOC Automation Engine v2.0</span>
-        </div>
+        <span class="text-xs text-slate-500 font-mono">SOC Automation Engine v2.0</span>
       </div>
 
       <div class="mt-4 overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
-            <tr class="text-slate-500 border-b border-slate-200 uppercase tracking-wider font-semibold bg-slate-50/70 font-mono">
+            <tr class="text-slate-500 border-b border-slate-200 uppercase tracking-wider font-semibold bg-slate-50 font-mono">
               <th class="py-2.5 px-3">Execution ID</th>
               <th class="py-2.5 px-3">Timestamp</th>
               <th class="py-2.5 px-3">Playbook</th>
               <th class="py-2.5 px-3">Target Adversary</th>
               <th class="py-2.5 px-3">Action Type</th>
-              <th class="py-2.5 px-3">Containment SLA</th>
               <th class="py-2.5 px-3">Status</th>
               <th class="py-2.5 px-3">Forensic Details</th>
             </tr>
           </thead>
           <tbody id="audit-table-body" class="divide-y divide-slate-100 font-mono text-slate-700">
             <tr>
-              <td colspan="8" class="py-6 text-center text-slate-400">No autonomous playbooks executed yet.</td>
+              <td colspan="7" class="py-6 text-center text-slate-400">No autonomous playbooks executed yet.</td>
             </tr>
           </tbody>
         </table>
@@ -370,9 +341,9 @@
 
   </main>
 
-  <!-- Comprehensive Forensic Dossier Modal -->
-  <div id="dossier-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+  <!-- Comprehensive Forensic Dossier Modal (Light Mode) -->
+  <div id="dossier-modal" class="fixed inset-0 bg-slate-900/35 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       
       <div class="flex items-start justify-between border-b border-slate-200 pb-3">
         <div class="flex items-center space-x-3">
@@ -436,16 +407,21 @@
         </div>
       </div>
 
-      <!-- Raw Packet / Forensic Evidence Payload -->
+      <!-- Enriched Threat Intelligence Summary -->
+      <div id="modal-intel-box" class="bg-blue-50/70 border border-blue-200 rounded-xl p-3 text-xs text-slate-700 space-y-1"></div>
+
+      <!-- Raw Packet / Forensic Evidence Payload (Light Mode Code Block) -->
       <div class="space-y-1.5">
         <span class="text-xs font-semibold text-slate-700">Raw Intercepted Payload / Alert Metadata:</span>
-        <pre id="modal-raw-payload" class="p-3 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-xl overflow-x-auto max-h-36 selection:bg-emerald-800"></pre>
+        <pre id="modal-raw-payload" class="p-3.5 bg-slate-50 border border-slate-200 text-slate-800 font-mono text-[11px] rounded-xl overflow-x-auto max-h-40 shadow-inner"></pre>
       </div>
 
       <!-- Action Footer -->
       <div class="flex items-center justify-between pt-3 border-t border-slate-200">
-        <span class="text-xs text-slate-500">Autonomous containment enforced in 118 ms</span>
-        <button onclick="closeDossierModal()" class="px-4 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-900 text-white rounded-lg shadow-sm transition">
+        <a id="modal-download-json" href="#" download class="px-3.5 py-2 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg transition flex items-center gap-1.5">
+          <i class="fa-solid fa-download"></i> Download Case JSON
+        </a>
+        <button onclick="closeDossierModal()" class="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition">
           Close Dossier
         </button>
       </div>
@@ -453,8 +429,42 @@
     </div>
   </div>
 
+  <!-- SOAR Policy Configuration Modal (Light Mode) -->
+  <div id="policy-modal" class="fixed inset-0 bg-slate-900/35 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-indigo-600"></i> Autonomous SOAR Policy
+        </h3>
+        <button onclick="closePolicyModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <label class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer">
+          <span class="font-semibold text-slate-800">Enable Automated IP Quarantine</span>
+          <input id="policy-autoban" type="checkbox" checked class="h-4 w-4 text-indigo-600 rounded">
+        </label>
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Auto-Ban Threshold Severity</label>
+          <select id="policy-threshold" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none">
+            <option value="1">Severity 1 Only (Critical)</option>
+            <option value="2">Severity 1 &amp; 2 (Critical + High)</option>
+            <option value="3">All Severities (1, 2, 3)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Default Quarantine TTL (Seconds)</label>
+          <input id="policy-ttl" type="number" value="300" min="30" max="86400" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:border-indigo-500 focus:outline-none">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-200">
+        <button onclick="closePolicyModal()" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium">Cancel</button>
+        <button onclick="savePolicy()" class="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition">Save Policy</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Manual Quarantine Modal -->
-  <div id="manual-ban-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div id="manual-ban-modal" class="fixed inset-0 bg-slate-900/35 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -484,7 +494,7 @@
   </div>
 
   <!-- Threat Intel Modal -->
-  <div id="intel-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div id="intel-modal" class="fixed inset-0 bg-slate-900/35 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -504,33 +514,41 @@
     let audioEnabled = true;
     let mitreChartInstance = null;
     let severityChartInstance = null;
+    const seenIncidentIds = new Set();
 
-    // Web Audio Synthesizer (Realistic Radar Ping Chime)
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    // Parse naive or Z-terminated UTC timestamps safely across all browser timezones
+    function parseUtcDate(str) {
+      if (!str) return new Date();
+      if (!str.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(str)) {
+        return new Date(str + 'Z');
+      }
+      return new Date(str);
+    }
+
+    // Web Audio Synthesizer (Radar Ping Chime)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
     function playAlertPing() {
-      if (!audioEnabled) return;
+      if (!audioEnabled || !AudioCtx) return;
       try {
-        if (!audioCtx) audioCtx = new AudioContext();
+        if (!audioCtx) audioCtx = new AudioCtx();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
-        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.15); // Drop to A4
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.15);
 
-        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.10, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.25);
-      } catch (e) {
-        // Audio error silent fallback
-      }
+      } catch (e) {}
     }
 
     function toggleSound() {
@@ -552,24 +570,23 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       
-      const bg = type === 'danger' ? 'bg-red-600 text-white' : type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-white';
+      const bg = type === 'danger'
+        ? 'bg-red-600 text-white'
+        : type === 'success'
+        ? 'bg-emerald-600 text-white'
+        : 'bg-blue-600 text-white';
       const icon = type === 'danger' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info';
       
       toast.className = `${bg} px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 text-xs font-medium pointer-events-auto transition transform translate-y-2 opacity-0`;
       toast.innerHTML = `
         <div class="flex items-center gap-2.5">
           <i class="fa-solid ${icon}"></i>
-          <span>${message}</span>
+          <span>${escapeHtml(message)}</span>
         </div>
       `;
       container.appendChild(toast);
 
-      // Animate in
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 20);
-
-      // Dismiss after 3.5s
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 20);
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
@@ -582,17 +599,18 @@
       mitreChartInstance = new Chart(ctxMitre, {
         type: 'bar',
         data: {
-          labels: ['Initial Access', 'Execution', 'Cred Access', 'C2', 'Exfiltration', 'Discovery'],
+          labels: ['Reconnaissance', 'Initial Access', 'Execution', 'Cred Access', 'Command & Control', 'Exfiltration', 'Discovery'],
           datasets: [{
-            label: 'Attacks Blocked',
-            data: [0, 0, 0, 0, 0, 0],
+            label: 'Attacks Contained',
+            data: [0, 0, 0, 0, 0, 0, 0],
             backgroundColor: [
-              'rgba(239, 68, 68, 0.75)',
-              'rgba(249, 115, 22, 0.75)',
-              'rgba(245, 158, 11, 0.75)',
-              'rgba(168, 85, 247, 0.75)',
-              'rgba(16, 185, 129, 0.75)',
-              'rgba(59, 130, 246, 0.75)'
+              'rgba(59, 130, 246, 0.80)',
+              'rgba(239, 68, 68, 0.80)',
+              'rgba(249, 115, 22, 0.80)',
+              'rgba(245, 158, 11, 0.80)',
+              'rgba(168, 85, 247, 0.80)',
+              'rgba(16, 185, 129, 0.80)',
+              'rgba(236, 72, 153, 0.80)'
             ],
             borderRadius: 6,
             borderSkipped: false
@@ -601,9 +619,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
             y: {
               beginAtZero: true,
@@ -611,7 +627,7 @@
               grid: { color: '#f1f5f9' }
             },
             x: {
-              ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
+              ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } },
               grid: { display: false }
             }
           }
@@ -647,7 +663,7 @@
     function updateChartData() {
       if (!mitreChartInstance || !severityChartInstance) return;
 
-      const tacticCounts = { 'TA0001': 0, 'TA0002': 0, 'TA0006': 0, 'TA0011': 0, 'TA0010': 0, 'TA0007': 0 };
+      const tacticCounts = { 'TA0043': 0, 'TA0001': 0, 'TA0002': 0, 'TA0006': 0, 'TA0011': 0, 'TA0010': 0, 'TA0007': 0 };
       let sev1 = 0, sev2 = 0, sev3 = 0;
 
       allIncidents.forEach(inc => {
@@ -656,15 +672,17 @@
         else sev3++;
 
         const t = (inc.mitre_tactic || '').toUpperCase();
-        if (t.includes('TA0001') || t.includes('INITIAL')) tacticCounts['TA0001']++;
+        if (t.includes('TA0043') || t.includes('RECON')) tacticCounts['TA0043']++;
+        else if (t.includes('TA0001') || t.includes('INITIAL')) tacticCounts['TA0001']++;
         else if (t.includes('TA0002') || t.includes('EXECUTION')) tacticCounts['TA0002']++;
         else if (t.includes('TA0006') || t.includes('CREDENTIAL')) tacticCounts['TA0006']++;
         else if (t.includes('TA0011') || t.includes('COMMAND')) tacticCounts['TA0011']++;
-        else if (t.includes('TA0010') || t.includes('EXFILTRATION')) tacticCounts['TA0010']++;
+        else if (t.includes('TA0010') || t.includes('EXFIL')) tacticCounts['TA0010']++;
         else tacticCounts['TA0007']++;
       });
 
       mitreChartInstance.data.datasets[0].data = [
+        tacticCounts['TA0043'],
         tacticCounts['TA0001'],
         tacticCounts['TA0002'],
         tacticCounts['TA0006'],
@@ -678,7 +696,6 @@
       severityChartInstance.update('none');
     }
 
-    // 1-Click Attack Simulator Trigger
     async function simulateAttack(scenario, btnElement) {
       const origHtml = btnElement.innerHTML;
       btnElement.disabled = true;
@@ -687,15 +704,13 @@
       try {
         const res = await fetch(`/api/simulate/${scenario}`, { method: 'POST' });
         const data = await res.json();
-        
-        playAlertPing();
-        showToast(`🚨 ${data.signature} contained! Quarantined ${data.attacker_ip}`, 'danger');
+        showToast(`${data.signature} -> ${data.containment_action}`, 'danger');
         
         btnElement.innerHTML = `<i class="fa-solid fa-check"></i> Triggered`;
         setTimeout(() => {
           btnElement.innerHTML = origHtml;
           btnElement.disabled = false;
-        }, 1200);
+        }, 900);
 
         await fetchInitialData();
       } catch (err) {
@@ -705,7 +720,6 @@
       }
     }
 
-    // Fetch and sync data
     async function fetchInitialData() {
       try {
         const [statsRes, incidentsRes, bansRes, auditRes] = await Promise.all([
@@ -716,6 +730,7 @@
         ]);
         
         allIncidents = incidentsRes || [];
+        allIncidents.forEach(i => seenIncidentIds.add(i.id));
         activeBans = bansRes || [];
 
         updateStatsUI(statsRes);
@@ -735,6 +750,8 @@
       document.getElementById('stat-high').textContent = `${stats.high_alerts || 0} High`;
       document.getElementById('stat-bans').textContent = (stats.active_banned_ips || 0).toLocaleString();
       document.getElementById('stat-soar').textContent = (stats.total_playbooks_executed || 0).toLocaleString();
+      const mttr = stats.avg_response_time_ms !== undefined ? stats.avg_response_time_ms : 118.4;
+      document.getElementById('stat-latency').textContent = `${mttr} ms`;
     }
 
     function filterIncidents() {
@@ -783,28 +800,28 @@
       const badgeColor = isCrit ? 'bg-red-50 text-red-700 border-red-200' : isHigh ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200';
       const severityLabel = isCrit ? 'SEV-1 CRITICAL' : isHigh ? 'SEV-2 HIGH' : 'SEV-3 MEDIUM';
 
-      card.className = `p-3.5 bg-slate-50/70 border ${isCrit ? 'border-red-200 hover:border-red-400' : 'border-slate-200 hover:border-slate-300'} rounded-xl transition flex flex-col gap-2.5 shadow-sm hover:shadow-md`;
+      card.className = `p-3.5 bg-white border ${isCrit ? 'border-red-200 hover:border-red-400' : 'border-slate-200 hover:border-slate-300'} rounded-xl transition flex flex-col gap-2.5 shadow-xs hover:shadow-md`;
       card.innerHTML = `
         <div class="flex items-start justify-between gap-2">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded border ${badgeColor}">${severityLabel}</span>
             <span class="text-xs font-bold text-slate-900">${escapeHtml(alert.signature)}</span>
           </div>
-          <span class="text-[10px] font-mono text-slate-400 shrink-0">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+          <span class="text-[10px] font-mono text-slate-400 shrink-0">${parseUtcDate(alert.timestamp).toLocaleTimeString()}</span>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono pt-1 border-t border-slate-200/60">
-          <div><span class="text-slate-400">ATTACKER:</span> <button onclick="openThreatIntel('${alert.src_ip}')" class="text-blue-600 font-bold hover:underline">${alert.src_ip}:${alert.src_port}</button></div>
-          <div><span class="text-slate-400">TARGET:</span> <span class="text-slate-700">${alert.dest_ip}:${alert.dest_port}</span></div>
-          <div><span class="text-slate-400">PROTO:</span> <span class="text-purple-600 font-semibold">${alert.proto}</span></div>
-          <div><span class="text-slate-400">MITRE:</span> <span class="text-amber-700 font-semibold">${alert.mitre_technique || alert.mitre_tactic || 'T1190'}</span></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono pt-1 border-t border-slate-100">
+          <div><span class="text-slate-400">ATTACKER:</span> <button onclick="openThreatIntel('${escapeHtml(alert.src_ip)}')" class="text-blue-600 font-bold hover:underline">${escapeHtml(alert.src_ip)}:${alert.src_port}</button></div>
+          <div><span class="text-slate-400">TARGET:</span> <span class="text-slate-700">${escapeHtml(alert.dest_ip)}:${alert.dest_port}</span></div>
+          <div><span class="text-slate-400">PROTO:</span> <span class="text-purple-600 font-semibold">${escapeHtml(alert.proto)}</span></div>
+          <div><span class="text-slate-400">MITRE:</span> <span class="text-amber-700 font-semibold">${escapeHtml(alert.mitre_technique || alert.mitre_tactic || 'T1190')}</span></div>
         </div>
 
         <div class="flex items-center justify-between pt-1">
           <span class="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-check"></i> Autonomous Containment Enforced
+            <i class="fa-solid fa-check"></i> Autonomous Containment & Forensic Dossier Ready
           </span>
-          <button onclick="openDossierModal('${alert.id}')" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline">
+          <button onclick="openDossierModal('${escapeHtml(alert.id)}')" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline">
             <i class="fa-solid fa-file-shield"></i> View Dossier &rarr;
           </button>
         </div>
@@ -837,30 +854,30 @@
 
       list.forEach(ban => {
         const item = document.createElement('div');
-        const exp = new Date(ban.expires_at);
+        const exp = parseUtcDate(ban.expires_at);
         const diffSec = Math.max(0, Math.floor((exp - now) / 1000));
         const mins = Math.floor(diffSec / 60);
         const secs = diffSec % 60;
         const timeStr = `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
 
-        item.className = 'p-3 bg-red-50/70 border border-red-200 rounded-xl flex flex-col gap-2 shadow-sm';
+        item.className = 'p-3 bg-red-50/70 border border-red-200 rounded-xl flex flex-col gap-2 shadow-xs';
         item.innerHTML = `
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2 font-mono text-xs">
               <span class="h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
-              <span class="font-bold text-slate-900">${ban.ip}</span>
+              <button onclick="openThreatIntel('${escapeHtml(ban.ip)}')" class="font-bold text-slate-900 hover:text-blue-700 hover:underline">${escapeHtml(ban.ip)}</button>
               <span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-semibold border border-red-200">BLOCKED</span>
             </div>
             <span class="text-[10px] font-mono font-semibold text-red-700 bg-white px-2 py-0.5 rounded border border-red-200">
               <i class="fa-solid fa-stopwatch"></i> ${timeStr}
             </span>
           </div>
-          <p class="text-[11px] text-slate-600 truncate">${ban.reason || ban.associated_signature}</p>
+          <p class="text-[11px] text-slate-600 truncate">${escapeHtml(ban.reason || ban.associated_signature)}</p>
           <div class="flex items-center justify-end gap-1.5 pt-1 border-t border-red-100">
-            <button onclick="extendBan('${ban.ip}')" class="bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-1 rounded transition border border-slate-300">
+            <button onclick="extendBan('${escapeHtml(ban.ip)}')" class="bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-1 rounded transition border border-slate-300">
               +10 Min
             </button>
-            <button onclick="unbanIP('${ban.ip}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold px-2.5 py-1 rounded transition shadow-sm">
+            <button onclick="unbanIP('${escapeHtml(ban.ip)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold px-2.5 py-1 rounded transition shadow-xs">
               Pardon / Unban
             </button>
           </div>
@@ -871,26 +888,31 @@
 
     function renderAuditLogs(logs) {
       const tbody = document.getElementById('audit-table-body');
-      if (!logs || logs.length === 0) return;
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-6 text-center text-slate-400">No autonomous playbooks executed yet.</td>
+          </tr>
+        `;
+        return;
+      }
       tbody.innerHTML = '';
-      logs.slice(0, 15).forEach(entry => {
+      logs.slice(0, 20).forEach(entry => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
         tr.innerHTML = `
-          <td class="py-2.5 px-3 text-blue-600 font-bold">${entry.id}</td>
-          <td class="py-2.5 px-3 text-slate-500">${new Date(entry.timestamp).toLocaleTimeString()}</td>
-          <td class="py-2.5 px-3 text-slate-900 font-medium">${entry.playbook_name}</td>
-          <td class="py-2.5 px-3 text-red-700 font-semibold">${entry.target_ip}</td>
-          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-semibold">${entry.action_type}</span></td>
-          <td class="py-2.5 px-3 text-emerald-600 font-semibold">&lt; 120 ms</td>
-          <td class="py-2.5 px-3"><span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">${entry.status}</span></td>
-          <td class="py-2.5 px-3 text-slate-600 text-[11px] truncate max-w-xs">${JSON.stringify(entry.details)}</td>
+          <td class="py-2.5 px-3 text-blue-600 font-bold">${escapeHtml(entry.id)}</td>
+          <td class="py-2.5 px-3 text-slate-500">${parseUtcDate(entry.timestamp).toLocaleTimeString()}</td>
+          <td class="py-2.5 px-3 text-slate-900 font-medium">${escapeHtml(entry.playbook_name)}</td>
+          <td class="py-2.5 px-3 text-red-700 font-semibold">${escapeHtml(entry.target_ip)}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-semibold">${escapeHtml(entry.action_type)}</span></td>
+          <td class="py-2.5 px-3"><span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">${escapeHtml(entry.status)}</span></td>
+          <td class="py-2.5 px-3 text-slate-600 text-[11px] truncate max-w-xs">${escapeHtml(JSON.stringify(entry.details))}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // Modal Operations
     function openDossierModal(alertId) {
       const inc = allIncidents.find(i => i.id === alertId) || allIncidents[0];
       if (!inc) return;
@@ -900,6 +922,23 @@
       document.getElementById('modal-mitre').textContent = `${inc.mitre_technique} (${inc.mitre_tactic})`;
       document.getElementById('modal-src-ip').textContent = `${inc.src_ip}:${inc.src_port}`;
       document.getElementById('modal-dest').textContent = `${inc.dest_ip}:${inc.dest_port} (${inc.proto})`;
+      document.getElementById('modal-download-json').href = `/api/case/${inc.id}`;
+
+      const intel = inc.threat_intel;
+      const intelBox = document.getElementById('modal-intel-box');
+      if (intel) {
+        intelBox.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-blue-900"><i class="fa-solid fa-globe"></i> Threat Intel Profile</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${intel.is_malicious ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}">
+              Reputation Score: ${intel.reputation_score}/100
+            </span>
+          </div>
+          <p><strong>Origin:</strong> ${escapeHtml(intel.country)} (${escapeHtml(intel.country_code)}) &middot; <strong>ISP/ASN:</strong> ${escapeHtml(intel.isp)}</p>
+        `;
+      } else {
+        intelBox.innerHTML = `<span class="text-slate-500">Threat Intelligence enrichment pending.</span>`;
+      }
 
       const payloadText = inc.payload || (inc.raw_event ? JSON.stringify(inc.raw_event, null, 2) : 'No raw packet captured');
       document.getElementById('modal-raw-payload').textContent = payloadText;
@@ -912,25 +951,25 @@
     }
 
     async function openThreatIntel(ip) {
-      const res = await fetch(`/api/threat-intel/${ip}`).then(r => r.json());
+      const res = await fetch(`/api/threat-intel/${encodeURIComponent(ip)}`).then(r => r.json());
       const content = document.getElementById('intel-modal-content');
       content.innerHTML = `
         <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
           <div class="flex justify-between items-center">
-            <span class="text-sm font-bold text-slate-900 font-mono">${res.ip}</span>
+            <span class="text-sm font-bold text-slate-900 font-mono">${escapeHtml(res.ip)}</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full ${res.is_malicious ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-emerald-100 text-emerald-700 border border-emerald-300'} font-bold">
               ${res.is_malicious ? 'KNOWN THREAT ACTOR' : 'LOW RISK / CLEAN'}
             </span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs pt-2 text-slate-700">
             <div><span class="text-slate-400 font-medium">Reputation Score:</span> <span class="font-bold text-amber-600">${res.reputation_score}/100</span></div>
-            <div><span class="text-slate-400 font-medium">Country:</span> <span>${res.country} (${res.country_code})</span></div>
-            <div><span class="text-slate-400 font-medium">ISP / ASN:</span> <span>${res.isp}</span></div>
+            <div><span class="text-slate-400 font-medium">Country:</span> <span>${escapeHtml(res.country)} (${escapeHtml(res.country_code)})</span></div>
+            <div><span class="text-slate-400 font-medium">ISP / ASN:</span> <span>${escapeHtml(res.isp)}</span></div>
             <div><span class="text-slate-400 font-medium">Abuse Confidence:</span> <span>${res.abuse_confidence_score}%</span></div>
           </div>
           <div class="pt-2">
             <span class="text-slate-400 font-medium text-[11px]">Threat Classifications:</span>
-            <div class="flex gap-1 mt-1">${(res.tags || []).map(t => `<span class="bg-white text-blue-700 px-2 py-0.5 rounded text-[10px] border border-slate-300 font-semibold">${t}</span>`).join('')}</div>
+            <div class="flex flex-wrap gap-1 mt-1">${(res.tags || []).map(t => `<span class="bg-white text-blue-700 px-2 py-0.5 rounded text-[10px] border border-slate-300 font-semibold">${escapeHtml(t)}</span>`).join('')}</div>
           </div>
         </div>
       `;
@@ -941,15 +980,45 @@
       document.getElementById('intel-modal').classList.add('hidden');
     }
 
+    async function openPolicyModal() {
+      try {
+        const res = await fetch('/api/policy').then(r => r.json());
+        document.getElementById('policy-autoban').checked = res.auto_ban_enabled;
+        document.getElementById('policy-threshold').value = String(res.ban_threshold_severity);
+        document.getElementById('policy-ttl').value = res.ban_ttl_seconds;
+      } catch (e) {}
+      document.getElementById('policy-modal').classList.remove('hidden');
+    }
+
+    function closePolicyModal() {
+      document.getElementById('policy-modal').classList.add('hidden');
+    }
+
+    async function savePolicy() {
+      const payload = {
+        auto_ban_enabled: document.getElementById('policy-autoban').checked,
+        ban_threshold_severity: parseInt(document.getElementById('policy-threshold').value),
+        ban_ttl_seconds: parseInt(document.getElementById('policy-ttl').value) || 300
+      };
+      await fetch('/api/policy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      closePolicyModal();
+      showToast('SOAR Policy updated successfully', 'success');
+      fetchInitialData();
+    }
+
     async function extendBan(ip) {
-      await fetch(`/api/bans/${ip}/extend`, { method: 'POST' });
+      await fetch(`/api/bans/${encodeURIComponent(ip)}/extend`, { method: 'POST' });
       showToast(`Quarantine extended for ${ip} (+10 mins)`, 'success');
       fetchInitialData();
     }
 
     async function unbanIP(ip) {
       if (!confirm(`Are you sure you want to lift the quarantine ban on ${ip}?`)) return;
-      await fetch(`/api/bans/${ip}`, { method: 'DELETE' });
+      await fetch(`/api/bans/${encodeURIComponent(ip)}`, { method: 'DELETE' });
       showToast(`Pardoned IP ${ip}`, 'success');
       fetchInitialData();
     }
@@ -963,9 +1032,9 @@
 
     async function submitManualBan() {
       const ip = document.getElementById('ban-input-ip').value.trim();
-      const ttl = parseInt(document.getElementById('ban-input-ttl').value);
+      const ttl = parseInt(document.getElementById('ban-input-ttl').value) || 300;
       const reason = document.getElementById('ban-input-reason').value.trim();
-      if (!ip) return alert('Please enter an IP');
+      if (!ip) return alert('Please enter an IP address');
 
       await fetch('/api/bans', {
         method: 'POST',
@@ -980,16 +1049,23 @@
     async function clearIncidentStream() {
       await fetch('/api/incidents/clear', { method: 'POST' });
       allIncidents = [];
+      seenIncidentIds.clear();
       renderIncidents([]);
+      renderAuditLogs([]);
       updateChartData();
-      showToast('Incident stream cleared', 'info');
+      fetchInitialData();
+      showToast('Incident stream & audit view cleared', 'info');
     }
 
     function escapeHtml(str) {
-      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    // WebSocket Live Updates
     function initWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${window.location.host}/ws/live`);
@@ -997,14 +1073,16 @@
       ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
         if (msg.type === 'NEW_INCIDENT') {
-          playAlertPing();
-          addIncidentCard(msg.data, true);
-          allIncidents.unshift(msg.data);
-          updateChartData();
+          if (!seenIncidentIds.has(msg.data.id)) {
+            seenIncidentIds.add(msg.data.id);
+            playAlertPing();
+          }
+          fetchInitialData();
         } else if (msg.type === 'STATS_UPDATE') {
           updateStatsUI(msg.data);
+        } else {
+          fetchInitialData();
         }
-        fetchInitialData();
       };
 
       ws.onclose = () => {

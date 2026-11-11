@@ -9,7 +9,7 @@ echo ========================================================================
 echo.
 echo [*] Terminating python uvicorn/flask instances on ports 8000 and 8080...
 
-powershell -Command "Get-Process -Name python -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*app.py*' -or $_.CommandLine -like '*run_local_demo*' } | Stop-Process -Force"
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*app.py*' -or $_.CommandLine -like '*run_local_demo*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
 
 echo.
 echo [OK] All local demo services stopped cleanly.

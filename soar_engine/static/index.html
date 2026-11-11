@@ -570,19 +570,30 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       
-      const bg = type === 'danger'
-        ? 'bg-red-600 text-white'
+      const borderClass = type === 'danger'
+        ? 'border-l-red-600'
         : type === 'success'
-        ? 'bg-emerald-600 text-white'
-        : 'bg-blue-600 text-white';
-      const icon = type === 'danger' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info';
+        ? 'border-l-emerald-600'
+        : type === 'progress'
+        ? 'border-l-indigo-600'
+        : 'border-l-blue-600';
+      const iconHtml = type === 'danger'
+        ? '<i class="fa-solid fa-triangle-exclamation text-red-600"></i>'
+        : type === 'success'
+        ? '<i class="fa-solid fa-circle-check text-emerald-600"></i>'
+        : type === 'progress'
+        ? '<i class="fa-solid fa-spinner fa-spin text-indigo-600"></i>'
+        : '<i class="fa-solid fa-circle-info text-blue-600"></i>';
       
-      toast.className = `${bg} px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 text-xs font-medium pointer-events-auto transition transform translate-y-2 opacity-0`;
+      toast.className = `bg-white border border-slate-200 border-l-4 ${borderClass} text-slate-800 px-4 py-3 rounded-xl shadow-xl flex items-center justify-between gap-3 text-xs font-medium pointer-events-auto transition transform translate-y-2 opacity-0`;
       toast.innerHTML = `
         <div class="flex items-center gap-2.5">
-          <i class="fa-solid ${icon}"></i>
+          ${iconHtml}
           <span>${escapeHtml(message)}</span>
         </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 text-xs shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       `;
       container.appendChild(toast);
 
@@ -590,7 +601,8 @@
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      }, type === 'progress' ? 2000 : 3800);
+      return toast;
     }
 
     // Chart.js Initialization
@@ -699,21 +711,24 @@
     async function simulateAttack(scenario, btnElement) {
       const origHtml = btnElement.innerHTML;
       btnElement.disabled = true;
-      btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Firing...`;
+      btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Proceeding...`;
+      const pendingToast = showToast(`Action Proceeding: Dispatching ${scenario.toUpperCase()} simulation to SOAR engine...`, 'progress');
 
       try {
         const res = await fetch(`/api/simulate/${scenario}`, { method: 'POST' });
         const data = await res.json();
+        if (pendingToast && pendingToast.parentElement) pendingToast.remove();
         showToast(`${data.signature} -> ${data.containment_action}`, 'danger');
         
         btnElement.innerHTML = `<i class="fa-solid fa-check"></i> Triggered`;
         setTimeout(() => {
           btnElement.innerHTML = origHtml;
           btnElement.disabled = false;
-        }, 900);
+        }, 1000);
 
         await fetchInitialData();
       } catch (err) {
+        if (pendingToast && pendingToast.parentElement) pendingToast.remove();
         btnElement.innerHTML = origHtml;
         btnElement.disabled = false;
         showToast(`Error triggering attack: ${err}`, 'danger');

@@ -29,7 +29,10 @@ PORTAL_HTML = """
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen antialiased flex flex-col items-center justify-center p-4 sm:p-6">
 
-  <div class="max-w-4xl w-full space-y-6">
+  <!-- Fixed Top-Right Floating Notification Stack (Light Mode) -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2.5 max-w-sm w-full pointer-events-none"></div>
+
+  <div class="max-w-4xl w-full space-y-5">
     
     <!-- Header Banner (Light Mode) -->
     <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -50,6 +53,15 @@ PORTAL_HTML = """
       </a>
     </div>
 
+    <!-- Always-Visible Live Action Execution Banner -->
+    <div id="action-banner" class="hidden bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition">
+      <div id="action-banner-text" class="flex items-center gap-2.5 text-xs font-medium text-slate-800"></div>
+      <a href="http://localhost:8000" target="_blank" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline shrink-0 flex items-center gap-1">
+        <span>View in SOAR Hub (:8000)</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+
     <!-- Interactive Attack Launcher Grid (Light Mode) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       
@@ -63,7 +75,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Database Extraction Attack</h3>
           <p class="text-xs text-slate-500 mt-1">Sends <code class="text-amber-700 font-mono bg-amber-50 px-1 py-0.5 rounded">' UNION SELECT ...</code> to extract admin credentials.</p>
         </div>
-        <button onclick="triggerAttack('sqli')" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('sqli', this)" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed">
           <i class="fa-solid fa-play"></i> Trigger SQL Injection
         </button>
       </div>
@@ -78,7 +90,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Credential Stuffing Burst</h3>
           <p class="text-xs text-slate-500 mt-1">Fires 5 rapid login attempts with password dictionaries to trigger HTTP 401s.</p>
         </div>
-        <button onclick="triggerAttack('bruteforce')" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('bruteforce', this)" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed">
           <i class="fa-solid fa-play"></i> Trigger Brute Force
         </button>
       </div>
@@ -93,7 +105,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Botnet C2 Heartbeat</h3>
           <p class="text-xs text-slate-500 mt-1">Sends an emulated malware check-in beacon to <code class="text-purple-700 font-mono bg-purple-50 px-1 py-0.5 rounded">/api/v1/heartbeat</code>.</p>
         </div>
-        <button onclick="triggerAttack('c2_beacon')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('c2_beacon', this)" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed">
           <i class="fa-solid fa-play"></i> Send C2 Beacon
         </button>
       </div>
@@ -108,7 +120,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Client-Side Script Injection</h3>
           <p class="text-xs text-slate-500 mt-1">Injects malicious <code class="text-blue-700 font-mono bg-blue-50 px-1 py-0.5 rounded">&lt;script&gt;alert(1)&lt;/script&gt;</code> into search.</p>
         </div>
-        <button onclick="triggerAttack('xss')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('xss', this)" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed">
           <i class="fa-solid fa-play"></i> Trigger XSS Attack
         </button>
       </div>
@@ -123,7 +135,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Sensitive Key Exfiltration</h3>
           <p class="text-xs text-slate-500 mt-1">Transfers an unencrypted RSA Private Key payload to an external endpoint.</p>
         </div>
-        <button onclick="triggerAttack('exfil')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <button onclick="triggerAttack('exfil', this)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed">
           <i class="fa-solid fa-play"></i> Exfiltrate RSA Key
         </button>
       </div>
@@ -138,7 +150,7 @@ PORTAL_HTML = """
           <h3 class="text-sm font-bold text-slate-900 mt-2.5">Canary Token Click Trap</h3>
           <p class="text-xs text-slate-600 mt-1">Clicking this link simulates an employee or attacker clicking a restricted lure file.</p>
         </div>
-        <a href="/canary/trap?target=Confidential_Employee_Salaries_2026.xlsx" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-center">
+        <a href="/canary/trap?target=Confidential_Employee_Salaries_2026.xlsx" onclick="triggerCanary(this, event)" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-center">
           <i class="fa-solid fa-triangle-exclamation"></i> Click Honeypot Trap Link
         </a>
       </div>
@@ -162,18 +174,115 @@ PORTAL_HTML = """
   </div>
 
   <script>
-    async function triggerAttack(type) {
+    const ATTACK_LABELS = {
+      sqli: 'SQL Injection',
+      bruteforce: 'Credential Stuffing Brute Force',
+      c2_beacon: 'Cobalt Strike C2 Beacon',
+      xss: 'Cross-Site Scripting (XSS)',
+      exfil: 'RSA Private Key Exfiltration'
+    };
+
+    function showToast(title, message, type = 'progress') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const borderMap = {
+        progress: 'border-l-blue-600',
+        success: 'border-l-emerald-600',
+        danger: 'border-l-red-600'
+      };
+      const iconMap = {
+        progress: '<i class="fa-solid fa-spinner fa-spin text-blue-600 text-base"></i>',
+        success: '<i class="fa-solid fa-shield-check text-emerald-600 text-base"></i>',
+        danger: '<i class="fa-solid fa-triangle-exclamation text-red-600 text-base"></i>'
+      };
+
+      toast.className = `pointer-events-auto bg-white border border-slate-200 border-l-4 ${borderMap[type] || 'border-l-blue-600'} rounded-xl p-3.5 shadow-xl flex items-start gap-3 transition transform translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <div class="pt-0.5 shrink-0">${iconMap[type] || iconMap.progress}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-slate-900">${title}</p>
+          <p class="text-[11px] text-slate-600 mt-0.5 leading-snug">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 text-xs shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 20);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, type === 'progress' ? 2200 : 4500);
+      return toast;
+    }
+
+    function setBanner(html, tone = 'progress') {
+      const banner = document.getElementById('action-banner');
+      const text = document.getElementById('action-banner-text');
+      banner.classList.remove('hidden', 'border-blue-300', 'bg-blue-50', 'border-emerald-300', 'bg-emerald-50', 'border-red-300', 'bg-red-50');
+      if (tone === 'progress') {
+        banner.classList.add('border-blue-300', 'bg-blue-50');
+      } else if (tone === 'success') {
+        banner.classList.add('border-emerald-300', 'bg-emerald-50');
+      } else {
+        banner.classList.add('border-red-300', 'bg-red-50');
+      }
+      text.innerHTML = html;
+    }
+
+    function triggerCanary(linkEl, event) {
+      event.preventDefault();
+      const targetUrl = linkEl.getAttribute('href');
+      linkEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Action Proceeding... Tripping Trap...';
+      showToast('Action Proceeding', 'Accessing Canary lure file and dispatching honeypot alert to SOAR...', 'progress');
+      setBanner('<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> <span><strong>Proceeding:</strong> Triggering Honeypot Canary Trap &rarr; alerting Suricata SOAR...</span>', 'progress');
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 350);
+    }
+
+    async function triggerAttack(type, btn) {
       const out = document.getElementById('output-box');
       const status = document.getElementById('console-status');
-      
-      status.innerHTML = '<span class="text-amber-600 animate-pulse font-semibold">Firing Attack Payload...</span>';
-      out.innerHTML += `<p class="text-amber-700 pt-2 font-bold">&gt;&gt;&gt; [ACTION] Initiating Attack: ${type.toUpperCase()} ...</p>`;
+      const label = ATTACK_LABELS[type] || type.toUpperCase();
+      const origHtml = btn ? btn.innerHTML : '';
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Action Proceeding...';
+      }
+
+      const progressToast = showToast(
+        'Action Proceeding...',
+        `Executing <strong>${label}</strong> payload and notifying Suricata SOAR Engine...`,
+        'progress'
+      );
+      setBanner(
+        `<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> <span><strong>Action Proceeding:</strong> Firing <strong>${label}</strong> payload &rarr; Suricata Detection &rarr; SOAR Containment...</span>`,
+        'progress'
+      );
+
+      status.innerHTML = '<span class="text-amber-600 animate-pulse font-semibold">Proceeding: Firing Attack Payload...</span>';
+      out.innerHTML += `<p class="text-amber-700 pt-2 font-bold">&gt;&gt;&gt; [PROCEEDING] Initiating Attack: ${label} ...</p>`;
       out.scrollTop = out.scrollHeight;
 
       try {
         const res = await fetch(`/api/trigger-test/${type}`, { method: 'POST' });
         const data = await res.json();
-        
+
+        if (progressToast && progressToast.parentElement) progressToast.remove();
+
+        showToast(
+          'Action Completed & Contained!',
+          `<strong>${data.signature}</strong><br><span class="text-emerald-700 font-semibold">${data.soar_action}</span>`,
+          'success'
+        );
+        setBanner(
+          `<i class="fa-solid fa-shield-check text-emerald-600"></i> <span><strong>Completed:</strong> ${data.signature} &mdash; <span class="text-emerald-700 font-semibold">${data.soar_action}</span></span>`,
+          'success'
+        );
+
         status.innerHTML = '<span class="text-emerald-600 font-semibold">Response &amp; Automated Containment Triggered</span>';
         out.innerHTML += `
           <p class="text-blue-700">    [+] Server Payload Response: HTTP ${data.http_status}</p>
@@ -183,8 +292,23 @@ PORTAL_HTML = """
           <p class="text-emerald-700 font-semibold">    [OK] Live Dashboard updated at: <a href="http://localhost:8000" target="_blank" class="underline">http://localhost:8000</a></p>
         `;
         out.scrollTop = out.scrollHeight;
+
+        if (btn) {
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Triggered & Contained!';
+          setTimeout(() => {
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+          }, 1400);
+        }
       } catch (err) {
+        if (progressToast && progressToast.parentElement) progressToast.remove();
+        showToast('Execution Error', `Could not execute ${label}: ${err}`, 'danger');
+        setBanner(`<i class="fa-solid fa-triangle-exclamation text-red-600"></i> <span><strong>Error:</strong> ${err}</span>`, 'danger');
         out.innerHTML += `<p class="text-red-600 font-semibold">[-] Error executing attack: ${err}</p>`;
+        if (btn) {
+          btn.innerHTML = origHtml;
+          btn.disabled = false;
+        }
       }
     }
   </script>

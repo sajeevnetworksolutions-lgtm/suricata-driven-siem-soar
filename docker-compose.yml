@@ -1,143 +1,166 @@
+# Testbed matching the paper (Sec. 4.2 / 4.4).
+# KEY CHANGE: Suricata and the SOAR engine share the TARGET's network namespace.
+#   - Suricata's AF_PACKET on eth0 therefore sees every packet to/from the target
+#   - SOAR's iptables INPUT chain is the target's own INPUT chain, so Eq. 9 really
+#     blocks the attacker before it reaches the application socket
+# Attackers/benign clients are separate containers with fixed IPs on siem_net,
+# so source IPs are preserved (no NAT) and match the paper's case studies.
+
+x-lab-client: &lab-client
+  image: python:3.11-slim
+  command: sleep infinity
+  volumes:
+    - ./attack_simulator:/attack_simulator:ro
+    - ./benchmarks:/benchmarks:ro
+  networks: [siem_net]
+  depends_on: [vulnerable-target]
+
 services:
-  # =========================================================================
-  # 1. SIEM Log Storage & Search: Elasticsearch
-  # =========================================================================
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     container_name: siem-elasticsearch
+    mem_limit: 2g                                   # paper: ES 2 GB
     environment:
       - node.name=siem-es-01
       - cluster.name=suricata-siem-cluster
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"            # paper: 512 MB JVM heap
+      - xpack.security.enabled=false                # lab only; enable for any shared network
       - xpack.security.enrollment.enabled=false
     ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    networks:
-      - siem_net
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    ports: ["127.0.0.1:9200:9200"]                  # bound to localhost, not 0.0.0.0
+    volumes: [es_data:/usr/share/elasticsearch/data]
+    networks: [siem_net]
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cat/health | grep -q green || curl -s http://localhost:9200/_cat/health | grep -q yellow"]
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cat/health | grep -Eq 'green|yellow'"]
       interval: 10s
       timeout: 10s
       retries: 10
 
-  # =========================================================================
-  # 2. SOC Analytics & Dashboards: Kibana
-  # =========================================================================
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
     container_name: siem-kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - SERVER_NAME=kibana.siem.local
-    ports:
-      - "5601:5601"
-    networks:
-      - siem_net
+    ports: ["127.0.0.1:5601:5601"]
+    networks: [siem_net]
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      elasticsearch: {condition: service_healthy}
 
-  # =========================================================================
-  # 3. Network Intrusion Detection Engine: Suricata IDS
-  # =========================================================================
+  # ---- the target owns the network namespace; published ports live HERE ----
+  vulnerable-target:
+    build: {context: ./target_service, dockerfile: Dockerfile}
+    container_name: siem-target-app
+    environment:
+      - TARGET_PORT=80
+      - SOAR_URL=http://127.0.0.1:8000              # SOAR shares this network namespace
+    ports:
+      - "8080:80"                                   # target web portal   (paper: port 8080)
+      - "2222:22"                                   # target SSH          (paper: port 2222)
+      - "8000:8000"                                 # SOAR dashboard/API (SOAR shares this netns)
+    networks:
+      siem_net:
+        ipv4_address: 172.28.0.10
+        aliases: [target.corp.local]
+    restart: unless-stopped
+
   suricata:
     image: jasonish/suricata:7.0
     container_name: siem-suricata
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_NICE
-    command: -i eth0 -k none -c /etc/suricata/suricata.yaml -v
+    network_mode: "service:vulnerable-target"       # sees all target traffic
+    depends_on: [vulnerable-target]
+    mem_limit: 1g                                   # paper: Suricata 1 GB
+    cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        mkdir -p /etc/suricata /var/lib/suricata/rules
+        cp /mnt/suricata/suricata.yaml /etc/suricata/suricata.yaml
+        cp -r /mnt/suricata/rules/. /var/lib/suricata/rules/
+        exec /docker-entrypoint.sh "$@"
+      - --
+    command: ["-i", "eth0", "-k", "none", "-c", "/etc/suricata/suricata.yaml", "-v"]   # -k none: checksum checks off
     volumes:
-      - ./config/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
-      - ./config/suricata/rules:/var/lib/suricata/rules:ro
+      - ./config/suricata/suricata.yaml:/mnt/suricata/suricata.yaml:ro
+      - ./config/suricata/rules:/mnt/suricata/rules:ro
       - suricata_logs:/var/log/suricata
-    networks:
-      siem_net:
-        aliases:
-          - ids.sensor.local
     restart: unless-stopped
 
-  # =========================================================================
-  # 4. Log Shipper & ECS Normalizer: Filebeat
-  # =========================================================================
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.12.0
     container_name: siem-filebeat
     user: root
+    command: ["-e", "--strict.perms=false"]
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - KIBANA_HOST=http://kibana:5601
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - suricata_logs:/var/log/suricata:ro
-    networks:
-      - siem_net
+    networks: [siem_net]
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      elasticsearch: {condition: service_healthy}
     restart: unless-stopped
 
-  # =========================================================================
-  # 5. SOAR Automated Incident Response Engine & Dashboard
-  # =========================================================================
   soar-engine:
-    build:
-      context: ./soar_engine
-      dockerfile: Dockerfile
+    build: {context: ./soar_engine, dockerfile: Dockerfile}
     container_name: siem-soar-engine
+    network_mode: "service:vulnerable-target"       # iptables here == target's iptables
+    depends_on: [vulnerable-target, suricata]
+    mem_limit: 512m                                 # paper: SOAR 512 MB
+    cap_add: [NET_ADMIN, LINUX_IMMUTABLE]           # NET_ADMIN for iptables, LINUX_IMMUTABLE for chattr +a
     environment:
       - EVE_LOG_PATH=/var/log/suricata/eve.json
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - SOAR_INPUT_MODE=eve                         # eve (200ms async tail) or elasticsearch (ECS poller)
       - AUTO_BAN_ENABLED=true
-      - BAN_THRESHOLD_SEVERITY=1
-      - BAN_TTL_SECONDS=300
+      - BAN_THRESHOLD_SEVERITY=1                    # S_threshold = 1
+      - BAN_TTL_SECONDS=300                         # tau_TTL = 300 s
+      - POLL_INTERVAL_MS=200                        # paper Sec. 4.4
+      - BAN_DB=/app/data/bans.db                    # persisted SQLite state
+      - BAN_AUDIT_LOG=/app/data/audit.jsonl         # append-only ban audit ledger
+      - DOSSIER_DIR=/app/data/forensics             # forensic dossiers + hash-chain ledger
+      - MAX_ACTIVE_BANS=1000
+      - DRY_RUN=false
+      # infrastructure that must never be banned (gateway, target, loopback, DNS)
+      - INTERNAL_WHITELIST=172.28.0.1,172.28.0.10,127.0.0.0/8,::1/128
+      # ablation switches for Table IV
+      - ENABLE_TTL=${ENABLE_TTL:-true}
+      - ENABLE_THREAT_INTEL=${ENABLE_THREAT_INTEL:-true}
+      - ENABLE_ECS=${ENABLE_ECS:-true}
+      - ENABLE_FORENSICS=${ENABLE_FORENSICS:-true}
+      - ASYNC_MODE=${ASYNC_MODE:-true}
       - SLACK_WEBHOOK_URL=
       - DISCORD_WEBHOOK_URL=
-      - VIRUSTOTAL_API_KEY=
       - ABUSEIPDB_API_KEY=
-    ports:
-      - "8000:8000"
+      - VIRUSTOTAL_API_KEY=
     volumes:
       - suricata_logs:/var/log/suricata:ro
       - ./soar_engine/data:/app/data
-    networks:
-      - siem_net
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     restart: unless-stopped
 
-  # =========================================================================
-  # 6. Target Testbed for Attack Scenarios
-  # =========================================================================
-  vulnerable-target:
-    build:
-      context: ./target_service
-      dockerfile: Dockerfile
-    container_name: siem-target-app
-    environment:
-      - TARGET_PORT=80
-      - SOAR_URL=http://soar-engine:8000
-    ports:
-      - "8080:80"
-      - "2222:22"
+  # ---- lab clients: fixed IPs reproduce the paper's case studies ----
+  attacker-web:                                      # CASE-AUTH host in the paper
+    <<: *lab-client
+    container_name: lab-attacker-auth
     networks:
-      siem_net:
-        aliases:
-          - target.corp.local
-    restart: unless-stopped
+      siem_net: {ipv4_address: 172.28.0.105}
+
+  attacker-c2:                                       # CASE-C2 host in the paper
+    <<: *lab-client
+    container_name: lab-attacker-c2
+    networks:
+      siem_net: {ipv4_address: 172.28.0.200}
+
+  benign-client:                                     # 10,000 benign HTTP/DNS requests
+    <<: *lab-client
+    container_name: lab-benign
+    networks:
+      siem_net: {ipv4_address: 172.28.0.50}
 
 networks:
   siem_net:
@@ -145,9 +168,8 @@ networks:
     ipam:
       config:
         - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
 
 volumes:
   es_data:
-    driver: local
   suricata_logs:
-    driver: local

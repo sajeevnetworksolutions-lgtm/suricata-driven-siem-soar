@@ -1,10 +1,11 @@
 %YAML 1.1
 ---
 
-# Suricata SIEM Configuration
+# Suricata SIEM Configuration (Paper Sec. 4.2 / Sec. 4.4)
 vars:
   address-groups:
-    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,127.0.0.0/8]"
+    # Protected target service & standard private ranges excluding Docker bridge attacker pool (172.28.0.0/16 except 172.28.0.10)
+    HOME_NET: "[172.28.0.10/32,127.0.0.0/8,192.168.0.0/16,10.0.0.0/8]"
     EXTERNAL_NET: "!$HOME_NET"
     HTTP_SERVERS: "$HOME_NET"
     SQL_SERVERS: "$HOME_NET"
@@ -21,7 +22,7 @@ default-log-dir: /var/log/suricata
 # Global Stats Configuration
 stats:
   enabled: yes
-  interval: 10sec
+  interval: 10
 
 # Outputs: EVE JSON is the core structured logging for Filebeat SIEM & SOAR
 outputs:
@@ -67,6 +68,10 @@ outputs:
             threads: no
             deltas: yes
 
+# Stream engine (checksum validation disabled for virtualized veth/bridge RX/TX offload)
+stream:
+  checksum-validation: no
+
 # Multi-threading Engine
 threading:
   set-cpu-affinity: no
@@ -108,12 +113,14 @@ app-layer:
     ssh:
       enabled: yes
 
-# Advanced Capture settings (AF_PACKET for Linux container)
+# Advanced Capture settings (Paper Sec. 4.4: AF_PACKET, cluster ID 99, 4 workers, checksums off)
 af-packet:
   - interface: eth0
+    threads: 4
     cluster-id: 99
     cluster-type: cluster_flow
     defrag: yes
+    checksum-checks: no
     use-mmap: yes
     mmap-locked: no
     tpacket-v3: yes

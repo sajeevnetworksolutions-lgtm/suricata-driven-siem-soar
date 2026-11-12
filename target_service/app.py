@@ -422,14 +422,14 @@ def trigger_test_attack(attack_type):
         },
         "xss": {
             "signature": "SIEM-WEB: Cross-Site Scripting (XSS) Tag Injection Detected",
-            "severity": 2,
+            "severity": 1,
             "category": "Web-Application-Attack",
             "mock_ip": "198.51.100.55",
-            "intel_score": 72,
+            "intel_score": 78,
             "mitre_tactic": "TA0002 - Execution",
             "mitre_technique": "T1059.007 - JavaScript",
             "payload": "GET /search?q=<script>alert(document.cookie)</script> HTTP/1.1",
-            "action": "Flagged High-Risk XSS Attempt & Enriched Source IP"
+            "action": "Quarantined IP 198.51.100.55 (300s TTL) + Case File Created"
         },
         "exfil": {
             "signature": "SIEM-EXFIL: Unencrypted RSA Private Key Exfiltration Attempt",
@@ -475,7 +475,7 @@ def trigger_test_attack(attack_type):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
+    if request.method == 'POST' or request.headers.get('Authorization'):
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
     return 'Login Form'
 
@@ -483,6 +483,11 @@ def login():
 def search():
     query = request.args.get('q', '')
     return f"Search results for: {query}"
+
+@app.route('/download')
+def download():
+    requested = request.args.get('file', '')
+    return jsonify({"status": "error", "message": "Access denied", "file": requested}), 403
 
 @app.route('/api/v1/heartbeat', methods=['POST'])
 def heartbeat():

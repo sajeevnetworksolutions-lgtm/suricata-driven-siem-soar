@@ -40,6 +40,8 @@ def run_test():
         print("[*] Waiting for SOAR Hub (:8000) and Target App (:8080) to initialize...")
         ready = False
         for _ in range(20):
+            if p_target.poll() is not None or p_soar.poll() is not None:
+                raise RuntimeError("A test server process exited early (check if ports 8000/8080 are already in use)")
             time.sleep(1)
             try:
                 r1 = requests.get("http://127.0.0.1:8000/api/stats", timeout=1)

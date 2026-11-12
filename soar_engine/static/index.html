@@ -765,7 +765,7 @@
       document.getElementById('stat-high').textContent = `${stats.high_alerts || 0} High`;
       document.getElementById('stat-bans').textContent = (stats.active_banned_ips || 0).toLocaleString();
       document.getElementById('stat-soar').textContent = (stats.total_playbooks_executed || 0).toLocaleString();
-      const mttr = stats.avg_response_time_ms !== undefined ? stats.avg_response_time_ms : 118.4;
+      const mttr = stats.avg_response_time_ms !== undefined ? stats.avg_response_time_ms : 0.0;
       document.getElementById('stat-latency').textContent = `${mttr} ms`;
     }
 
@@ -869,11 +869,14 @@
 
       list.forEach(ban => {
         const item = document.createElement('div');
-        const exp = parseUtcDate(ban.expires_at);
-        const diffSec = Math.max(0, Math.floor((exp - now) / 1000));
-        const mins = Math.floor(diffSec / 60);
-        const secs = diffSec % 60;
-        const timeStr = `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+        let timeStr = 'PERMANENT';
+        if (!ban.permanent && ban.expires_at && ban.expires_at !== 'PERMANENT') {
+          const exp = parseUtcDate(ban.expires_at);
+          const diffSec = Math.max(0, Math.floor((exp - now) / 1000));
+          const mins = Math.floor(diffSec / 60);
+          const secs = diffSec % 60;
+          timeStr = `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+        }
 
         item.className = 'p-3 bg-red-50/70 border border-red-200 rounded-xl flex flex-col gap-2 shadow-xs';
         item.innerHTML = `
@@ -1051,11 +1054,16 @@
       const reason = document.getElementById('ban-input-reason').value.trim();
       if (!ip) return alert('Please enter an IP address');
 
-      await fetch('/api/bans', {
+      const res = await fetch('/api/bans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ip, ttl_seconds: ttl, reason })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Quarantine rejected by SOAR policy' }));
+        showToast(err.detail || 'Quarantine rejected', 'danger');
+        return;
+      }
       closeManualBanModal();
       showToast(`Enforced quarantine on ${ip}`, 'danger');
       fetchInitialData();

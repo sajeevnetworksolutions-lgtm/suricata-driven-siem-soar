@@ -2,11 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies including iptables and curl
+# Install system dependencies including iptables, iproute2, e2fsprogs (chattr), and curl
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     iptables \
     iproute2 \
+    e2fsprogs \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

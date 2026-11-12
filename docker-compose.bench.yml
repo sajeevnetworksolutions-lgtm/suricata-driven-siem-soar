@@ -1,0 +1,19 @@
+# Benchmark override: makes eve.json readable from the host and mounts the load generators.
+# docker compose -f docker-compose.yml -f docker-compose.bench.yml up -d --build
+services:
+  suricata:
+    volumes:
+      - ./logs/suricata:/var/log/suricata          # replaces the named volume (same mount target)
+  soar-engine:
+    volumes:
+      - ./logs/suricata:/var/log/suricata:ro
+      - ./soar_engine/data:/app/data               # audit.jsonl / bans.db / forensics visible on host
+  filebeat:
+    volumes:
+      - ./logs/suricata:/var/log/suricata:ro
+  attacker-web:
+    volumes: ["./attack_simulator:/attack_simulator:ro", "./benchmark:/bench:ro"]
+  attacker-c2:
+    volumes: ["./attack_simulator:/attack_simulator:ro", "./benchmark:/bench:ro"]
+  benign-client:
+    volumes: ["./attack_simulator:/attack_simulator:ro", "./benchmark:/bench:ro"]

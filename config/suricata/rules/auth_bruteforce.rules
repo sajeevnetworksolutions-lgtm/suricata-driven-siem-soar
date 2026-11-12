@@ -1,19 +1,20 @@
 # =============================================================================
 # AUTHENTICATION & BRUTE FORCE DETECTION RULES
 # MITRE ATT&CK: TA0006 (Credential Access) / T1110 (Brute Force)
+# Severity: priority:1 -> triggers SOAR auto-quarantine (Eq. 8)
 # =============================================================================
 
 # 1. SSH Brute Force Inbound Connection Rate
-alert tcp any any -> $HOME_NET 22 (msg:"SIEM-AUTH: Potential SSH Brute Force / High Inbound Connection Rate"; flags:S; threshold:type both, track by_src, count 6, seconds 15; classtype:attempted-admin; sid:1000010; rev:1; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
+alert tcp any any -> $HOME_NET 22 (msg:"SIEM-AUTH: Potential SSH Brute Force / High Inbound Connection Rate"; flags:S; threshold:type both, track by_src, count 6, seconds 15; classtype:attempted-admin; priority:1; sid:1000010; rev:2; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
 
 # 2. SSH Brute Force (Alternative Port 2222)
-alert tcp any any -> $HOME_NET 2222 (msg:"SIEM-AUTH: Potential SSH Brute Force Attempt (Port 2222)"; flags:S; threshold:type both, track by_src, count 6, seconds 15; classtype:attempted-admin; sid:1000011; rev:1; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
+alert tcp any any -> $HOME_NET 2222 (msg:"SIEM-AUTH: Potential SSH Brute Force Attempt (Port 2222)"; flags:S; threshold:type both, track by_src, count 6, seconds 15; classtype:attempted-admin; priority:1; sid:1000011; rev:2; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
 
-# 3. HTTP 401 Unauthorized Burst (Web Login Brute Force)
-alert http $HTTP_SERVERS any -> any any (msg:"SIEM-AUTH: Multiple HTTP 401 Unauthorized Responses (Web Brute Force)"; flow:established,to_client; http.stat_code; content:"401"; threshold:type both, track by_dst, count 5, seconds 10; classtype:attempted-user; sid:1000012; rev:1; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
+# 3. HTTP 401 Unauthorized Burst (Web Login Brute Force - Table II: 5x401 / 10 s)
+alert http $HTTP_SERVERS any -> any any (msg:"SIEM-AUTH: Multiple HTTP 401 Unauthorized Responses (Web Brute Force)"; flow:established,to_client; http.stat_code; content:"401"; threshold:type both, track by_dst, count 5, seconds 10; classtype:attempted-user; priority:1; sid:1000012; rev:2; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
 
 # 4. Hydra / Medusa Automation Tool in User-Agent or Protocol
-alert http any any -> $HTTP_SERVERS any (msg:"SIEM-AUTH: Automated Credential Tool User-Agent (Hydra/Medusa)"; flow:established,to_server; http.user_agent; pcre:"/(hydra|medusa|patator|crowbar)/i"; classtype:attempted-admin; sid:1000013; rev:1; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
+alert http any any -> $HTTP_SERVERS any (msg:"SIEM-AUTH: Automated Credential Tool User-Agent (Hydra/Medusa)"; flow:established,to_server; http.user_agent; pcre:"/(hydra|medusa|patator|crowbar)/i"; classtype:attempted-admin; priority:1; sid:1000013; rev:2; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
 
 # 5. FTP Login Failure Burst
-alert tcp any 21 -> any any (msg:"SIEM-AUTH: FTP Multiple Login Failures (530 Login incorrect)"; flow:established,to_client; content:"530"; nocase; threshold:type both, track by_dst, count 5, seconds 15; classtype:attempted-user; sid:1000014; rev:1; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)
+alert tcp any 21 -> any any (msg:"SIEM-AUTH: FTP Multiple Login Failures (530 Login incorrect)"; flow:established,to_client; content:"530"; nocase; threshold:type both, track by_dst, count 5, seconds 15; classtype:attempted-user; priority:1; sid:1000014; rev:2; metadata:mitre_tactic_id TA0006, mitre_technique_id T1110.001;)

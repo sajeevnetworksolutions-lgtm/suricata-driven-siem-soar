@@ -31,12 +31,16 @@ logs/*.json
 !logs/.gitkeep
 *.log
 
-# Runtime Forensic Case Dossiers (Keep folder structure & sample)
+# Runtime Forensic Case Dossiers & SQLite/Audit Ledgers (Keep folder structure & sample)
 soar_engine/data/forensics/*.json
+soar_engine/data/forensics/*.jsonl
 !soar_engine/data/forensics/sample_case_dossier.json
 !soar_engine/data/forensics/.gitkeep
 soar_engine/data/*.json
+soar_engine/data/*.jsonl
+soar_engine/data/*.db
 !soar_engine/data/.gitkeep
+.pytest_cache/
 
 # Docker Volumes & Databases
 es_data/

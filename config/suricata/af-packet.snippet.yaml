@@ -1,0 +1,12 @@
+# Merge into config/suricata/suricata.yaml (replaces the existing af-packet: block).
+# Matches paper Sec. 4.4: AF_PACKET ring, 4 worker threads, cluster ID 99,
+# hardware checksum verification disabled.
+runmode: workers
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    threads: 4
+    defrag: yes
+    use-mmap: yes
+    checksum-checks: no

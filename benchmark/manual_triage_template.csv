@@ -1,0 +1,4 @@
+trial,alert_time,contained_time,mttr_ms
+# Fill with a REAL tabletop exercise (>=20 trials): a volunteer analyst receives the same Suricata alert in Kibana
+# and manually blocks the IP. Record wall-clock times; mttr_ms = (contained_time - alert_time) in ms.
+# Do NOT invent values; if you cannot measure it, call the baseline "modelled" in the paper.

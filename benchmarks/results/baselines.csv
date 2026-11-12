@@ -1,0 +1,3 @@
+baseline,measurement_type,cycles,mean_mttd_ms,sd_mttd_ms,automated_containment_pct,mean_mttr_ms_or_note
+suricata_elk_only,measured_detection_siem_no_autoban,500,71.741,50.358,0.0,N/A (no auto-ban; manual triage)
+snort_manual,modelled,500,8511.05,1443.949,0.0,64577.9

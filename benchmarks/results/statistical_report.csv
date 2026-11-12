@@ -1,0 +1,8 @@
+series,kind,n,recall_pct,containment_pct,mttd_mean_ms,mttr_mean_ms,mttr_sd_ms,mttr_median_ms,mttr_p95_ms,ti_mean_ms,ban_mean_ms,forensic_mean_ms,notify_mean_ms,cpu_mean_pct,ram_mean_mb,t_stat_vs_full,t_pvalue,wilcoxon_stat_vs_full,wilcoxon_pvalue,significant_alpha_0_001
+full,soar_variant_measured,500,100.0,100.0,176.974,45.617,17.899,41.761,66.212,0.07,17.649,25.436,0.004,59.24,56.72,0.0,1.000000e+00,0.0,1.000000e+00,False
+no_async,soar_variant_measured,500,100.0,100.0,98.794,56.715,18.905,52.217,89.322,0.08,13.227,42.993,0.003,68.13,60.23,-9.5321,1.138680e-20,19709.0,3.142390e-40,True
+no_ecs,soar_variant_measured,500,100.0,100.0,172.29,74.758,40.978,63.114,149.11,0.08,18.432,53.454,0.003,62.76,60.08,-14.5722,4.430218e-42,5551.0,8.949730e-70,True
+no_forensics,soar_variant_measured,500,100.0,100.0,176.7,20.962,38.778,18.201,31.479,0.075,17.723,0.0,0.003,62.8,60.46,12.9079,2.337738e-34,1017.0,5.432338e-81,True
+no_ti,soar_variant_measured,500,100.0,100.0,176.867,63.158,32.849,60.048,91.226,0.0,19.124,39.797,0.003,63.36,60.02,-10.4849,3.886726e-24,10093.0,2.159520e-59,True
+no_ttl,soar_variant_measured,500,100.0,100.0,176.866,63.824,32.293,57.245,125.878,0.096,20.656,39.664,0.004,68.54,59.77,-11.0264,2.259709e-26,18910.5,1.126255e-41,True
+snort_manual_modelled,baseline_modelled,500,100.0,0.0,8511.05,64577.9,9576.308,64683.88,81750.867,0.0,0.0,0.0,0.0,0.0,0.0,-150.6826,0.000000e+00,0.0,1.264719e-83,True
